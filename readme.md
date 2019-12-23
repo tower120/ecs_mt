@@ -1,0 +1,1 @@
+Header only multithread-oriented ECS (entity-component-system) library. C++17

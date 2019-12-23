@@ -1,0 +1,18 @@
+/build
+
+#################
+## CMake
+#################
+CMakeCache.txt
+
+#################
+## Clion
+#################
+.idea
+cmake-build-*
+
+#################
+## Visual Studio
+#################
+.vs
+CMakeSettings.json
