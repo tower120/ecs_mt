@@ -2,7 +2,7 @@
 
 #include "../entity.hpp"
 #include "../archetype.hpp"
-#include "utils.hpp"
+#include "utils/algorithm.hpp"
 
 #include <deque>
 #include <vector>
@@ -61,7 +61,7 @@ namespace tower120::ecs::impl{
             const entity entity = emplace_entity();
 
             // make components
-            foreach([&](auto& ctr_component){
+            utils::foreach([&](auto& ctr_component){
                 using component_t = std::decay_t<decltype(ctr_component)>;
                 std::get<component_list<component_t>>(components).emplace_back(std::move(ctr_component));
             }, ctr_components...);
@@ -77,6 +77,8 @@ namespace tower120::ecs::impl{
         void erase(entity entity){
             assert(entity.data->archetype_container == this);
             const std::size_t index = entity.data->index;
+
+            using namespace utils;
 
             // erase from entities
             unordered_erase(entities, entities.begin() + index);

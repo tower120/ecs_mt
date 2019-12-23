@@ -2,7 +2,7 @@
 
 #include  <functional>
 
-namespace tower120::ecs::impl{
+namespace tower120::ecs::impl::utils{
 
     template<class Closure, class ...Args>
     void foreach(Closure&& closure, Args&&...args){
