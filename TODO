@@ -1,2 +1,3 @@
  * look at static_any
  * O(1) component access with concrete archetype
+ * Implement, utilize chunks (for faster move between components_container s)

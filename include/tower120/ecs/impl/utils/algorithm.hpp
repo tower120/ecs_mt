@@ -1,38 +1,47 @@
 #pragma once
 
+#include "type_constant.hpp"
+#include "integral_constant_sequence.hpp"
+#include "invoke.hpp"
 #include  <functional>
 
 namespace tower120::ecs::impl::utils{
 
+    template<int N, class Closure>
+    constexpr void static_for(Closure&&);
+
+
     template<class Closure, class ...Args>
-    void foreach(Closure&& closure, Args&&...args){
-        (std::invoke(std::forward<Closure>(closure), args), ...);
+    constexpr void foreach(Closure&& closure, Args&&...args){
+        (utils::invoke(std::forward<Closure>(closure), args), ...);
     }
 
     template<class Closure, class ...Args>
-    void foreach(Closure&& closure, std::tuple<Args...>& tuple){
+    constexpr void foreach(Closure&& closure, std::tuple<Args...>& tuple){
         std::apply([&](auto&... args){
             foreach(std::forward<Closure>(closure), args...);
         }, tuple);
     }
 
-    namespace details{
-        template<class T, T... Ints>
-        constexpr auto integral_sequence_fn(std::integer_sequence<T, Ints...>){
-            return std::tuple< std::integral_constant<T,Ints>... >{};
-        }
-
-        template<class T, T N>
-        using integral_constant_sequence = decltype(integral_sequence_fn(std::make_integer_sequence<T, N>{}));
+    template<class ...Args, class Closure>
+    constexpr void foreach(Closure&& closure){
+        foreach(std::forward<Closure>(closure), type_constant<Args>{}...);
     }
 
-    template<std::size_t N>
-    using integral_constant_sequence = details::integral_constant_sequence<std::size_t, N>;
+    template<class Tuple, class Closure>
+    constexpr void foreach(Closure&& closure){
+        static_for<std::tuple_size_v<Tuple>>([&](auto integral_constant){
+            using T = std::tuple_element_t<integral_constant.value, Tuple>;
+            closure( type_constant<T>{} );
+        });
+    }
 
-    template<class ...Ts>
-    using integral_constant_sequence_for = details::integral_constant_sequence<std::size_t, sizeof...(Ts)>;
-
-
+    template<int N, class Closure>
+    constexpr void static_for(Closure&& closure){
+        std::apply([&](auto ...integral_constants){
+            (utils::invoke(std::forward<Closure>(closure), integral_constants), ...);
+        }, integral_constant_sequence<N>{});
+    }
 
     template<class Container, class Iterator>
     void unordered_erase(Container& container, Iterator iter){

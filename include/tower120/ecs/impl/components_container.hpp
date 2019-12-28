@@ -7,62 +7,29 @@
 #include "utils/static_any.hpp"
 #include "utils/type_constant.hpp"
 
+#include "components_container_types.hpp"
+
 #include <deque>
 #include <vector>
 #include <cassert>
 #include <utility>
 #include <algorithm>
 
-
 namespace tower120::ecs::impl{
 
-
-    /*template<template<class...> class Container, class ContainerExample = Container<int>>
-    class type_erased_container{
-    public:
-        type_erased_container(const type_erased_container&) = delete;
-        type_erased_container(type_erased_container&&)      = delete;
-
-        template<class T, class ...Args>
-        explicit type_erased_container(Args&&...args){
-            static_assert(sizeof(ContainerExample) >= sizeof(T));
-
-            new(storage) T(std::forward<Args>(args)...);
-            container_destructor = [](void* address){
-                static_cast<T*>(address)->~T();
-            };
-        }
-
-        template<class T>
-        T& get(){
-            assert(type_id == typeid(T));
-            return *static_cast<T*>(storage);
-        }
-
-        ~type_erased_container(){
-            container_destructor();
-        }
-    // -----------------------------------
-    //           DATA
-    // -----------------------------------
-    private:
-        std::byte storage[sizeof(ContainerExample)];
-        void (*container_destructor)(void*);
-
-        #ifndef NDEBUG
-        std::type_info type_id;
-        #endif
-    };*/
-
-
-
+    //
+    // component_list ordered by component_type_t
+    //
     class components_container{
     // -----------------------------------
     //          TYPES
     // -----------------------------------
     private:
-        template<class T> using component_list_t = std::vector<T>;
-        using type_erased_component_list_t = static_any<sizeof(component_list_t<int>)>;
+        //template<class T> using component_list_t = std::vector<T>;
+        //using type_erased_component_list_t = static_any<sizeof(component_list_t<int>)>;
+
+        template<class T> using component_list_t = components_container_types::component_list_t<T>;
+        using type_erased_component_list_t = components_container_types::type_erased_component_list_t;
 
     // -----------------------------------
     //          INTERFACE
@@ -71,9 +38,10 @@ namespace tower120::ecs::impl{
         components_container(const components_container&) = delete;
         components_container(components_container&&)      = delete;
 
-        template<class ...Components>
+        /*template<class ...Components>
         explicit components_container(entity_manager& entity_manager)
             : entity_manager(entity_manager)
+            , archetype(archetype<Components...>{})
         {
             using namespace utils;
 
@@ -92,9 +60,23 @@ namespace tower120::ecs::impl{
             foreach([&](auto integral_constant){
                 constexpr const std::size_t index = integral_constant.value;
                 using T = std::tuple_element_t<index, components_tuple>;
-                const auto type_id = component_type_id<T>();
+                const auto type_id = get_component_type<T>();
                 component_types[index] = type_id;
             }, integral_constant_sequence_for<Components...>{});
+        }*/
+
+        components_container(entity_manager& entity_manager, const archetype& archetype)
+            : entity_manager(entity_manager)
+            , archetype(archetype)
+        {
+            const auto& components = archetype.components();
+            const std::size_t size = components.size();
+            components_lists.reserve(size);
+            for(component_type_t component_type : components){
+                components_lists.emplace_back(
+                    component_type->make_type_erased_component_list()
+                );
+            }
         }
 
         template<class Component>
@@ -106,15 +88,27 @@ namespace tower120::ecs::impl{
 
         template<class Component>
         component_list_t<Component>& components(){
-            const auto type_id = component_type_id<Component>();
-
-            // linear search is fastest for <20-50 elements
-            const auto iter = std::find(component_types.begin(), component_types.end(), type_id);
-            assert(iter != component_types.end());
-
-            const std::size_t index = std::distance(component_types.begin(), iter);
+            const std::size_t index = archetype.component_index(Component::component_type);
             return components_lists[index].get< component_list_t<Component> >();
         }
+
+
+        // all components must be default constructible
+//        void emplace(entity entity){
+//            entities.emplace_back(entity);
+//            for(const type_erased_component_list_t& components_list : components_lists){
+//                components_list.get<>
+//            }
+//        }
+
+        // TODO : piecewise construct?
+        template<class ...Components>
+        void emplace(entity entity, Components...components){
+
+        }
+
+        /*template<class ...Components>
+        archetype_object_ref<Components...> emplace();*/
 
     // -----------------------------------
     //          IMPLEMENTATION
@@ -126,11 +120,12 @@ namespace tower120::ecs::impl{
     //           DATA
     // -----------------------------------
     private:
-        entity_manager& entity_manager;
+        // const
+        entity_manager& entity_manager;     // TODO: remove
+        const archetype archetype;
+
         std::vector<entity> entities;
         std::vector<type_erased_component_list_t> components_lists;
-
-        std::vector<component_type_id_t> component_types;       // TODO: small vector here
     };
 
-}
+} // namespace
