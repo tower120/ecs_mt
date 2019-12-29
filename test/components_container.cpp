@@ -8,11 +8,10 @@ int main() {
     using namespace tower120::ecs::impl;
     //using namespace ranges;
 
-    struct data_x : component<data_x>{
-        //using type = component<data_x>;
-        int x;
+    struct data_x {
+       int x;
     };
-    struct data_y : component<data_y>{
+    struct data_y {
         int y;
     };
 

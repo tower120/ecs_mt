@@ -37,7 +37,7 @@ namespace tower120::ecs{
     };
 
     // TODO: make concrete type wrapper
-    using component_type_t = const component_type_data*;
+    using component_type = const component_type_data*;
 
 
     // TODO:
@@ -46,17 +46,20 @@ namespace tower120::ecs{
     // need more stable way to get component id.
     // Solution:
     //   pass ID as template argument and use it
-    template<class Derived>
-    class component{
+    template<class Component>
+    class component_info{
     private:
         const constexpr static component_type_data type_data{
              /*.make_type_erased_component_list = */ [](){
                  using namespace impl::components_container_types;
-                 return type_erased_component_list_t{component_list_t<Derived>()};
+                 return type_erased_component_list_t{component_list_t<Component>()};
              }
         };
     public:
-         static constexpr const component_type_t component_type = &type_data;
+         static constexpr const component_type type = &type_data;
     };
+
+    template<class Component>
+    constexpr const component_type component_type_of = component_info<Component>::type;
 
 }

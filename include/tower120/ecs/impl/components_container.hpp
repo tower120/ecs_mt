@@ -69,10 +69,10 @@ namespace tower120::ecs::impl{
             : entity_manager(entity_manager)
             , archetype(archetype)
         {
-            const auto& components = archetype.components();
-            const std::size_t size = components.size();
+            const auto& component_types = archetype.components();
+            const std::size_t size = component_types.size();
             components_lists.reserve(size);
-            for(component_type_t component_type : components){
+            for(component_type component_type : component_types){
                 components_lists.emplace_back(
                     component_type->make_type_erased_component_list()
                 );

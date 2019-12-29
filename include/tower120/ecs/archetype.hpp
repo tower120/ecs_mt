@@ -23,7 +23,7 @@ namespace tower120::ecs{
     class archetype{
     public:
         static const constexpr std::size_t max_components = 8;
-        using components_t = chobo::static_vector<component_type_t, max_components>;
+        using components_t = chobo::static_vector<component_type, max_components>;
 
         template<class Range>
         explicit archetype(Range range) noexcept
@@ -39,14 +39,14 @@ namespace tower120::ecs{
         const components_t& components() const noexcept { return list; }
 
         [[nodiscard]]
-        std::size_t component_index(component_type_t component_type) const noexcept {
+        std::size_t component_index(component_type component_type) const noexcept {
             const auto found = std::lower_bound(list.begin(), list.end(), component_type);
             assert(found != list.end() && *found == component_type);
             return std::distance(list.begin(), found);
         }
 
         [[nodiscard]]
-        bool contains(component_type_t component_type) const {
+        bool contains(component_type component_type) const {
             return std::binary_search(list.begin(), list.end(), component_type);
         }
 
@@ -55,7 +55,7 @@ namespace tower120::ecs{
             const auto size = list.size();
             if (size != other.list.size()) return false;
 
-            const auto result = std::memcmp(list.data(), other.list.data(), size * sizeof(component_type_t));
+            const auto result = std::memcmp(list.data(), other.list.data(), size * sizeof(component_type));
             return result == 0;
         }
         [[nodiscard]]
@@ -76,11 +76,11 @@ namespace tower120::ecs{
             constexpr const std::size_t i = tuple_index<Component, std::tuple<Components...>>();
             return std::get<i>(indices);
         }
-        inline static const archetype archetype{std::initializer_list<component_type_t>{Components::component_type...}};
+        inline static const archetype archetype{std::initializer_list<component_type>{component_type_of<Components>...}};
     private:
         inline static const std::tuple indices = []() noexcept {
             return std::tuple{
-                archetype.component_index(Components::component_type)...
+                archetype.component_index(component_type_of<Components>)...
             };
         }();
     };
