@@ -86,9 +86,22 @@ namespace tower120::ecs::impl{
             return components<Component>()[entity_data.container_index];
         }
 
+        template<class Component, class Archetype>
+        Component& component(entity entity){
+            entity_data& entity_data = entity_manager.data(entity);
+            assert(entity_data.components_container != nullptr);
+            return components<Component, Archetype>()[entity_data.container_index];
+        }
+
         template<class Component>
         component_list_t<Component>& components(){
             const std::size_t index = archetype.component_index(Component::component_type);
+            return components_lists[index].get< component_list_t<Component> >();
+        }
+
+        template<class Component, class Archetype>
+        component_list_t<Component>& components(){
+            const std::size_t index = Archetype::template component_index<Component>();
             return components_lists[index].get< component_list_t<Component> >();
         }
 
@@ -104,7 +117,11 @@ namespace tower120::ecs::impl{
         // TODO : piecewise construct?
         template<class ...Components>
         void emplace(entity entity, Components...components){
+            using Archetype = archetype_t<Components...>;
+            assert(Archetype::archetype == this->archetype);
 
+            entities.emplace_back(entity);
+            (this->components<Components, Archetype>().emplace_back( std::move(components) ), ...);
         }
 
         /*template<class ...Components>

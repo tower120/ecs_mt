@@ -16,13 +16,17 @@ namespace tower120::ecs{
     class archetype_t;
 
 
+    // rename to any_archetype ?
+    //
+
+    // TODO : unique archetype_id + archetype_manager. Can be created only from main thread ? What for?
     class archetype{
     public:
         static const constexpr std::size_t max_components = 8;
         using components_t = chobo::static_vector<component_type_t, max_components>;
 
         template<class Range>
-        explicit archetype(Range range)
+        explicit archetype(Range range) noexcept
         {
             //static_assert( std::is_same_v<decltype(*range.begin()), component_type_t> );
             assert(std::size(range) <= max_components);
@@ -30,17 +34,6 @@ namespace tower120::ecs{
             std::copy(range.begin(), range.end(), std::back_inserter(list));
             std::sort(list.begin(), list.end());
         }
-
-        /*template<class ...Components>
-        explicit archetype(const archetype_t<Components...>&)
-        {
-            using Archetype = archetype_t<Components...>;
-            using namespace impl::utils;
-            foreach<Archetype::components>([&](auto type_constant){
-                using Component = typename decltype(type_constant)::type;
-                list.emplace_back(Component::component_type);
-            });
-        }*/
 
         [[nodiscard]]
         const components_t& components() const noexcept { return list; }
@@ -78,16 +71,16 @@ namespace tower120::ecs{
     class archetype_t {
     public:
         template<class Component>
-        static std::size_t component_index(){
+        [[nodiscard]] static std::size_t component_index() noexcept {
             using namespace impl::utils;
             constexpr const std::size_t i = tuple_index<Component, std::tuple<Components...>>();
             return std::get<i>(indices);
         }
+        inline static const archetype archetype{std::initializer_list<component_type_t>{Components::component_type...}};
     private:
         inline static const std::tuple indices = []() noexcept {
-            const archetype arch(std::initializer_list<component_type_t>{Components::component_type...});
             return std::tuple{
-                arch.component_index(Components::component_type)...
+                archetype.component_index(Components::component_type)...
             };
         }();
     };

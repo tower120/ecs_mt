@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <tower120/ecs/impl/utils/monotonic_counter.hpp>
 #include <tower120/ecs/impl/utils/static_any.hpp>
 #include <tower120/ecs/impl/components_container_types.hpp>
 
@@ -35,9 +34,6 @@ namespace tower120::ecs{
 
         // move entity (entity, type_erased_component_list_t from, type_erased_component_list_t to)
         // erase entity (entity, type_erased_component_list_t)
-
-
-        int id = 1;
     };
 
     // TODO: make concrete type wrapper
@@ -54,10 +50,10 @@ namespace tower120::ecs{
     class component{
     private:
         const constexpr static component_type_data type_data{
-//             /*.make_type_erased_component_list = */ [](){
-//                 using namespace impl::components_container_types;
-//                 return type_erased_component_list_t{component_list_t<Derived>()};
-//             }
+             /*.make_type_erased_component_list = */ [](){
+                 using namespace impl::components_container_types;
+                 return type_erased_component_list_t{component_list_t<Derived>()};
+             }
         };
     public:
          static constexpr const component_type_t component_type = &type_data;

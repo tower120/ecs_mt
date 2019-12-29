@@ -5,17 +5,27 @@
 
 int main() {
     using namespace tower120::ecs;
+    using namespace tower120::ecs::impl;
     //using namespace ranges;
 
-    struct data_x{
+    struct data_x : component<data_x>{
+        //using type = component<data_x>;
         int x;
     };
-    struct data_y{
+    struct data_y : component<data_y>{
         int y;
     };
 
     entity_manager entity_data_manager;
-    impl::components_container container(entity_manager);
+    components_container container{entity_data_manager, archetype_t<data_x, data_y>::archetype};
+
+
+    container.emplace(
+        entity_data_manager.make(),
+        data_x{}, data_y{}
+    );
+
+
 
     // test emplace
     /*auto obj_ref = container.emplace();

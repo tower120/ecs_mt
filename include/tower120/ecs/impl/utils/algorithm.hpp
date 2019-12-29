@@ -8,8 +8,11 @@
 namespace tower120::ecs::impl::utils{
 
     template<int N, class Closure>
-    constexpr void static_for(Closure&&);
-
+    constexpr void static_for(Closure&& closure){
+        std::apply([&](auto ...integral_constants){
+            (utils::invoke(std::forward<Closure>(closure), integral_constants), ...);
+        }, integral_constant_sequence<N>{});
+    }
 
     template<class Closure, class ...Args>
     constexpr void foreach(Closure&& closure, Args&&...args){
@@ -34,13 +37,6 @@ namespace tower120::ecs::impl::utils{
             using T = std::tuple_element_t<integral_constant.value, Tuple>;
             closure( type_constant<T>{} );
         });
-    }
-
-    template<int N, class Closure>
-    constexpr void static_for(Closure&& closure){
-        std::apply([&](auto ...integral_constants){
-            (utils::invoke(std::forward<Closure>(closure), integral_constants), ...);
-        }, integral_constant_sequence<N>{});
     }
 
     template<class Container, class Iterator>
