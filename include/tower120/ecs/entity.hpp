@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <deque>
 #include <vector>
+#include <cstdint>
 
 namespace tower120::ecs{
 
@@ -30,7 +31,7 @@ namespace tower120::ecs{
     class entity{
         friend entity_manager;
     public:
-        using index_type = uint32_t;
+        using index_type = std::uint32_t;
     private:
         explicit entity(entity::index_type entity_data_index) noexcept : entity_data_index(entity_data_index){}
     public:

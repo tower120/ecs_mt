@@ -1,5 +1,3 @@
-#include "test_utils.hpp"
-
 #include <tower120/ecs/archetype.hpp>
 #include "test_utils.hpp"
 

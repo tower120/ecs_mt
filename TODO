@@ -2,4 +2,4 @@
  * O(1) component access with concrete archetype
  * Implement, utilize chunks (for faster move between components_container s)
  * unique archetype_id + archetype_manager. Can be created only from main thread.
- * remove : component<Derived>
+ * remove "utils::invoke" usage
