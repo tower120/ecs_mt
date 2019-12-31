@@ -25,11 +25,6 @@ namespace tower120::ecs::impl{
     //          TYPES
     // -----------------------------------
     private:
-        //template<class T> using component_list_t = std::vector<T>;
-        //using type_erased_component_list_t = static_any<sizeof(component_list_t<int>)>;
-
-        template<class T> using component_list_t = components_container_types::component_list_t<T>;
-        using type_erased_component_list_t = components_container_types::type_erased_component_list_t;
 
     // -----------------------------------
     //          INTERFACE
@@ -38,71 +33,45 @@ namespace tower120::ecs::impl{
         components_container(const components_container&) = delete;
         components_container(components_container&&)      = delete;
 
-        /*template<class ...Components>
-        explicit components_container(entity_manager& entity_manager)
-            : entity_manager(entity_manager)
-            , archetype(archetype<Components...>{})
-        {
-            using namespace utils;
-
-            using components_tuple = std::tuple<Components...>;
-
-            // fill components
-            components_lists.resize(sizeof...(Components));
-            foreach([&](auto integral_constant){
-                constexpr const std::size_t index = integral_constant.value;
-                using T = std::tuple_element_t<index, components_tuple>;
-                components_lists[index].template emplace<component_list_t<T>>();
-            }, integral_constant_sequence_for<Components...>{});
-
-            // fill component_type_to_index
-            component_types.resize(sizeof...(Components));
-            foreach([&](auto integral_constant){
-                constexpr const std::size_t index = integral_constant.value;
-                using T = std::tuple_element_t<index, components_tuple>;
-                const auto type_id = get_component_type<T>();
-                component_types[index] = type_id;
-            }, integral_constant_sequence_for<Components...>{});
-        }*/
-
         components_container(entity_manager& entity_manager, const archetype& archetype)
             : entity_manager(entity_manager)
             , archetype(archetype)
         {
             const auto& component_types = archetype.components();
             const std::size_t size = component_types.size();
-            components_lists.reserve(size);
+
+            components_arrays.reserve(size);
             for(component_type component_type : component_types){
-                components_lists.emplace_back(
-                    component_type->make_type_erased_component_list()
-                );
+                components_arrays.emplace_back( component_type->make_any_vector() );
             }
         }
 
         template<class Component>
         Component& component(entity entity){
-            entity_data& entity_data = entity_manager.data(entity);
-            assert(entity_data.components_container != nullptr);
+            const entity_data& entity_data = entity_manager.data(entity);
+            assert(is_valid_entity(entity));
             return components<Component>()[entity_data.container_index];
         }
 
         template<class Component, class Archetype>
         Component& component(entity entity){
-            entity_data& entity_data = entity_manager.data(entity);
-            assert(entity_data.components_container != nullptr);
+            const entity_data& entity_data = entity_manager.data(entity);
+            assert(is_valid_entity(entity));
+            assert(Archetype::archetype == this->archetype);
             return components<Component, Archetype>()[entity_data.container_index];
         }
 
         template<class Component>
-        component_list_t<Component>& components(){
+        std::vector<Component>& components(){
             const std::size_t index = archetype.component_index(Component::component_type);
-            return components_lists[index].get< component_list_t<Component> >();
+            return components_arrays[index].cast< std::vector<Component> >();
         }
 
         template<class Component, class Archetype>
-        component_list_t<Component>& components(){
+        std::vector<Component>& components(){
+            assert(Archetype::archetype == this->archetype);
             const std::size_t index = Archetype::template component_index<Component>();
-            return components_lists[index].get< component_list_t<Component> >();
+            return components_arrays[index].cast< std::vector<Component> >();
         }
 
 
@@ -114,24 +83,40 @@ namespace tower120::ecs::impl{
 //            }
 //        }
 
-        // TODO : piecewise construct?
         template<class ...Components>
         void emplace(entity entity, Components...components){
             using Archetype = archetype_t<Components...>;
             assert(Archetype::archetype == this->archetype);
 
+            assert(entity_manager.data(entity).components_container == nullptr);
+
             entities.emplace_back(entity);
             (this->components<Components, Archetype>().emplace_back( std::move(components) ), ...);
+            assert(is_valid_components_matrix());
         }
-
-        /*template<class ...Components>
-        archetype_object_ref<Components...> emplace();*/
 
     // -----------------------------------
     //          IMPLEMENTATION
     // -----------------------------------
     private:
+        [[nodiscard]]
+        bool is_valid_entity(entity entity) const {
+            const entity_data& entity_data = entity_manager.data(entity);
+                if (entity_data.components_container != this) return false;
+            const std::size_t index = entity_data.container_index;
+                if (index >= entities.size()) return false;
+                if (entities[index] != entity) return false;
+            return true;
+        }
 
+        [[nodiscard]]
+        bool is_valid_components_matrix(){
+            std::size_t size = entities.size();
+            for(const auto& components_array :  components_arrays){
+                if (size != components_array.size()) return false;
+            }
+            return true;
+        }
 
     // -----------------------------------
     //           DATA
@@ -142,7 +127,7 @@ namespace tower120::ecs::impl{
         const archetype archetype;
 
         std::vector<entity> entities;
-        std::vector<type_erased_component_list_t> components_lists;
+        std::vector<any_vector> components_arrays;
     };
 
 } // namespace

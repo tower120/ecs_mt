@@ -7,7 +7,10 @@
 
 namespace tower120::ecs::impl{
 
-    struct any_contiguous_array_info{
+    struct any_contiguous_container_info{
+        using move_ctr_t = void(*)(void* any_container_self, void* any_container_other);
+        const move_ctr_t move_ctr;
+
         using size_t = std::size_t(*)(const void* any_container);
         const size_t size;
 
@@ -22,16 +25,27 @@ namespace tower120::ecs::impl{
     };
 
 
-    class any_contiguous_array{
+    template<std::size_t storage_size>
+    class static_any_contiguous_container{
     // ---------------------------------------------
     //              INTERFACE
     // ---------------------------------------------
     public:
-        any_contiguous_array(const any_contiguous_array&) = delete;
-        any_contiguous_array(any_contiguous_array&&)      = delete;
+        static_any_contiguous_container(const static_any_contiguous_container&) = delete;
+        //static_any_contiguous_container(static_any_contiguous_container&&)      = delete;
+
+        // just to make std::vector-friendly
+        static_any_contiguous_container(static_any_contiguous_container&& other) noexcept
+            : info(other.info)
+            #ifndef NDEBUG
+            , type_index{other.type_index}
+            #endif
+        {
+            info.move_ctr(&storage, &other.storage);
+        }
 
         template<class Container>
-        explicit any_contiguous_array(Container container)
+        explicit static_any_contiguous_container(Container container)
             : info{construct_info<Container>()}
             #ifndef NDEBUG
             , type_index{typeid(Container)}
@@ -56,7 +70,7 @@ namespace tower120::ecs::impl{
             info.unordered_erase(&storage, index);
         }
 
-        ~any_contiguous_array(){
+        ~static_any_contiguous_container(){
             info.destructor(&storage);
         };
     // ---------------------------------------------
@@ -64,8 +78,13 @@ namespace tower120::ecs::impl{
     // ---------------------------------------------
     private:
         template<class Container>
-        static const any_contiguous_array_info& construct_info(){
-            constexpr const static any_contiguous_array_info info{
+        static const any_contiguous_container_info& construct_info(){
+            constexpr const static any_contiguous_container_info info{
+                /*.move_ctr = */ [](void* any_container_self, void* any_container_other){
+                    Container& container_self  = *static_cast<Container*>(any_container_self);
+                    Container& container_other = *static_cast<Container*>(any_container_other);
+                    new (&container_self) Container (std::move(container_other));
+                },
                 /*.size = */ [](const void* any_container) -> std::size_t{
                     const Container& container = *static_cast<const Container*>(any_container);
                     return container.size();
@@ -89,13 +108,14 @@ namespace tower120::ecs::impl{
     //              DATA
     // ---------------------------------------------
     private:
-        static constexpr const std::size_t storage_size = sizeof(std::vector<int>);
         std::byte storage[storage_size];
-        const any_contiguous_array_info& info;
+        const any_contiguous_container_info& info;
         #ifndef NDEBUG
         std::type_index type_index;
         #endif
     };
 
+
+    using any_vector = static_any_contiguous_container<sizeof(std::vector<int>)>;
 
 }

@@ -1,4 +1,4 @@
-#include <tower120/ecs/impl/any_contiguous_array.hpp>
+#include <tower120/ecs/impl/static_any_contiguous_container.hpp>
 #include "test_utils.hpp"
 
 struct data{
@@ -8,7 +8,7 @@ struct data{
 int main() {
     using namespace tower120::ecs::impl;
 
-    any_contiguous_array any_vec{ std::vector<data>{} };
+    any_vector any_vec{ std::vector<data>{} };
     auto& vec = any_vec.cast<std::vector<data>>();
 
     REQUIRE(any_vec.size() == 0);
@@ -17,4 +17,10 @@ int main() {
     any_vec.unordered_erase(0);
     REQUIRE(any_vec.size() == 0);
 
+    // move test
+    vec.push_back({2});
+    auto any_vec2{std::move(any_vec)};
+    //auto any_vec2{std::move(any_vec)};
+    REQUIRE(any_vec.size()  == 0);
+    REQUIRE(any_vec2.size() == 1);
 }
