@@ -7,8 +7,6 @@
 #include "utils/static_any.hpp"
 #include "utils/type_constant.hpp"
 
-#include "components_container_types.hpp"
-
 #include <deque>
 #include <vector>
 #include <cassert>
@@ -34,19 +32,24 @@ namespace tower120::ecs::impl{
         components_container(components_container&&)      = delete;
 
         components_container(entity_manager& entity_manager, const archetype& archetype)
-            : entity_manager(entity_manager)
-            , archetype(archetype)
+            : archetype(archetype)
+            , entity_manager(entity_manager)
         {
             const auto& component_types = archetype.components();
-            const std::size_t size = component_types.size();
 
-            components_arrays.reserve(size);
+            components_arrays.reserve(component_types.size());
             for(component_type component_type : component_types){
                 components_arrays.emplace_back( component_type->make_any_vector() );
             }
         }
 
+        [[nodiscard]]
+        std::size_t size() const noexcept {
+            return entities.size();
+        }
+
         template<class Component>
+        [[nodiscard]]
         Component& component(entity entity){
             const entity_data& entity_data = entity_manager.data(entity);
             assert(is_valid_entity(entity));
@@ -62,12 +65,15 @@ namespace tower120::ecs::impl{
         }
 
         template<class Component>
+        [[nodiscard]]
         std::vector<Component>& components(){
-            const std::size_t index = archetype.component_index(Component::component_type);
+            const std::size_t index = archetype.component_index(component_type_of<Component>);
             return components_arrays[index].cast< std::vector<Component> >();
         }
 
+
         template<class Component, class Archetype>
+        [[nodiscard]]
         std::vector<Component>& components(){
             assert(Archetype::archetype == this->archetype);
             const std::size_t index = Archetype::template component_index<Component>();
@@ -85,14 +91,57 @@ namespace tower120::ecs::impl{
 
         template<class ...Components>
         void emplace(entity entity, Components...components){
+            entity_data& entity_data = entity_manager.data(entity);
             using Archetype = archetype_t<Components...>;
             assert(Archetype::archetype == this->archetype);
-
-            assert(entity_manager.data(entity).components_container == nullptr);
+            assert(entity_data.components_container == nullptr);
 
             entities.emplace_back(entity);
             (this->components<Components, Archetype>().emplace_back( std::move(components) ), ...);
             assert(is_valid_components_matrix());
+
+            // update entity
+            entity_data.components_container = this;
+            entity_data.container_index = entities.size() - 1;
+        }
+
+        void erase(entity entity){
+            assert(is_valid_entity(entity));
+            entity_data& entity_data = entity_manager.data(entity);
+
+            using namespace impl::utils;
+
+            // do erase
+            const std::size_t index = entity_data.container_index;
+            unordered_erase(entities, entities.begin() + index);
+            for(any_vector& component_array : components_arrays){
+                component_array.unordered_erase(index);
+            }
+            assert(is_valid_components_matrix());
+
+            // update entity
+            entity_data.components_container = nullptr;
+        }
+
+        template<class Archetype>
+        void erase(entity entity){
+            assert(is_valid_entity(entity));
+            entity_data& entity_data = entity_manager.data(entity);
+
+            using namespace impl::utils;
+
+            // do erase
+            const std::size_t index = entity_data.container_index;
+            unordered_erase(entities, entities.begin() + index);
+            foreach<typename Archetype::components>([&](auto type_constant){
+                using Component  = typename decltype(type_constant)::type;
+                auto& components = this->components<Component, Archetype>();
+                unordered_erase(components, components.begin() + index );
+            });
+            assert(is_valid_components_matrix());
+
+            // update entity
+            entity_data.components_container = nullptr;
         }
 
     // -----------------------------------
@@ -121,10 +170,11 @@ namespace tower120::ecs::impl{
     // -----------------------------------
     //           DATA
     // -----------------------------------
-    private:
-        // const
-        entity_manager& entity_manager;     // TODO: remove
+    public:
         const archetype archetype;
+
+    private:
+        entity_manager& entity_manager;     // TODO: remove
 
         std::vector<entity> entities;
         std::vector<any_vector> components_arrays;

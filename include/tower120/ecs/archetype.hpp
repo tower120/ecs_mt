@@ -70,6 +70,8 @@ namespace tower120::ecs{
     template<class ...Components>
     class archetype_t {
     public:
+        using components = std::tuple<Components...>;
+
         template<class Component>
         [[nodiscard]] static std::size_t component_index() noexcept {
             using namespace impl::utils;

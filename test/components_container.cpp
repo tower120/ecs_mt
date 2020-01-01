@@ -8,56 +8,72 @@ int main() {
 
     struct data_x {
        int x;
+
+       bool operator==(const data_x& other) const{ return x == other.x; }
     };
     struct data_y {
         int y;
+
+        bool operator==(const data_y& other) const{ return y == other.y; }
     };
 
     entity_manager entity_data_manager;
-    components_container container{entity_data_manager, archetype_t<data_x, data_y>::archetype};
+    using Archetype = archetype_t<data_x, data_y>;
+    components_container container{entity_data_manager, Archetype::archetype};
 
-
-    container.emplace(
-        entity_data_manager.make(),
-        data_x{}, data_y{}
-    );
-
-
+    entity entity = entity_data_manager.make();
 
     // test emplace
-    /*auto obj_ref = container.emplace();
-    const entity first_entity = obj_ref.entity;
-    std::get<data_x&>(obj_ref.components).x = 11;
-    obj_ref.component<data_y>().y = 12;
+    container.emplace(
+        entity,
+        data_x{1}, data_y{2}
+    );
 
-    // test iterators
-    REQUIRE((*container.begin()).component<data_x>().x == 11);
-    REQUIRE((*container.begin()).component<data_y>().y == 12);
+    // test per component entity access
+    {
+        const data_x& x1 = container.component<data_x>(entity);
+        const data_x& x2 = container.component<data_x, Archetype>(entity);
+        REQUIRE(x1 == x2);
+        REQUIRE(x1.x == 1);
 
-    // test range
-    container.emplace(data_x{21}, data_y{22});
-    container.emplace(data_x{31}, data_y{32});
+        const data_y& y1 = container.component<data_y>(entity);
+        const data_y& y2 = container.component<data_y, Archetype>(entity);
+        REQUIRE(y1 == y2);
+        REQUIRE(y1.y == 2);
+    }
 
-    const auto show_container = [&](){
-        for(auto obj : container){
-            std::cout
-                << obj.component<data_x>().x
-                << ":"
-                << obj.component<data_y>().y
-                << std::endl;
-        }
-    };
-    show_container();
+    // test components access
+    {
+        const auto& xs1 = container.components<data_x, Archetype>();
+        const auto& xs2 = container.components<data_x>();
+        REQUIRE(xs1 == xs2);
+        REQUIRE(xs1.size() == 1);
+        REQUIRE(xs1[0].x == 1);
+    }
 
     // test erase
-    std::cout << "test erase" << std::endl;
-    container.erase(first_entity);
-    show_container();*/
+    container.erase(entity);
+    REQUIRE(container.size() == 0);
 
-    /*REQUIRE_EQUAL(views::transform(container, &impl::archetype_object_ref<data_x, data_y>::components), {
-        components_tuple{{31}, {32}},
-        components_tuple{{21}, {22}}
-    });*/
+    {
+        class entity old_entity = entity;
+
+        // test entity free
+        entity_data_manager.free(entity);
+
+        // test entity reuse
+        entity = entity_data_manager.make();
+
+        REQUIRE(entity == old_entity);
+    }
+
+    // test erase w Archetype
+    container.emplace(
+        entity,
+        data_x{1}, data_y{2}
+    );
+    container.erase<Archetype>(entity);
+    REQUIRE(container.size() == 0);
 
     return 0;
 }

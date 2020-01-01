@@ -7,6 +7,14 @@
 
 namespace tower120::ecs::impl::utils{
 
+    namespace details{
+        template <typename> struct is_tuple: std::false_type {};
+        template <typename ...T> struct is_tuple<std::tuple<T...>>: std::true_type {};
+    }
+
+    template <class T>
+    constexpr const static bool is_tuple = details::is_tuple<std::decay_t<T>>::value;
+
     template<int N, class Closure>
     constexpr void static_for(Closure&& closure){
         std::apply([&](auto ...integral_constants){
@@ -26,12 +34,14 @@ namespace tower120::ecs::impl::utils{
         }, tuple);
     }
 
-    template<class ...Args, class Closure>
+    /*template<class Arg, class ...Args, class Closure,
+        typename = std::enable_if_t<!is_tuple<Arg>>>
     constexpr void foreach(Closure&& closure){
-        foreach(std::forward<Closure>(closure), type_constant<Args>{}...);
-    }
+        foreach(std::forward<Closure>(closure), type_constant<Arg>{}, type_constant<Args>{}...);
+    }*/
 
-    template<class Tuple, class Closure>
+    template<class Tuple, class Closure,
+        typename = std::enable_if_t<is_tuple<Tuple>>>
     constexpr void foreach(Closure&& closure){
         static_for<std::tuple_size_v<Tuple>>([&](auto integral_constant){
             using T = std::tuple_element_t<integral_constant.value, Tuple>;

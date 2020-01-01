@@ -1,5 +1,7 @@
  * look at static_any. Add get_unsafe
  * O(1) component access with concrete archetype
  * Implement, utilize chunks (for faster move between components_container s)
- * unique archetype_id + archetype_manager. Can be created only from main thread.
+ * unique archetype_id + archetype_manager. Can be created only from main thread. ???
  * remove "utils::invoke" usage
+ * return std::span whenever possible,
+ * rename acrhetype => any_arhcetype; archetype_t => acrhetype;
