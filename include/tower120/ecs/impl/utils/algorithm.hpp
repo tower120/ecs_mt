@@ -2,7 +2,6 @@
 
 #include "type_constant.hpp"
 #include "integral_constant_sequence.hpp"
-#include "invoke.hpp"
 #include  <functional>
 
 namespace tower120::ecs::impl::utils{
@@ -18,13 +17,13 @@ namespace tower120::ecs::impl::utils{
     template<int N, class Closure>
     constexpr void static_for(Closure&& closure){
         std::apply([&](auto ...integral_constants){
-            (utils::invoke(std::forward<Closure>(closure), integral_constants), ...);
+            (closure(integral_constants), ...);
         }, integral_constant_sequence<N>{});
     }
 
     template<class Closure, class ...Args>
     constexpr void foreach(Closure&& closure, Args&&...args){
-        (utils::invoke(std::forward<Closure>(closure), args), ...);
+        ( closure(std::forward<Args>(args)) ,  ...);
     }
 
     template<class Closure, class ...Args>

@@ -4,7 +4,6 @@
 #include <tower120/ecs/component.hpp>
 #include "../archetype.hpp"
 #include "utils/algorithm.hpp"
-#include "utils/static_any.hpp"
 #include "utils/type_constant.hpp"
 
 #include <deque>

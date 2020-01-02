@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <tower120/ecs/impl/utils/static_any.hpp>
 #include <tower120/ecs/impl/static_any_contiguous_container.hpp>
 #include "entity.hpp"
 
