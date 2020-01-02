@@ -15,6 +15,7 @@ int main() {
     };
 
 
+    // general test
     archetype arch1(std::initializer_list<component_type>{
         component_type_of<data_x>,
         component_type_of<data_y>,
@@ -39,6 +40,7 @@ int main() {
     REQUIRE(arch1 != arch3);
 
 
+    // component_index test
     archetype_t<data_x, data_y> ct_archetype;
     REQUIRE(
         arch1.component_index(component_type_of<data_x>) == ct_archetype.component_index<data_x>()
@@ -46,7 +48,6 @@ int main() {
     REQUIRE(
         arch1.component_index(component_type_of<data_y>) == ct_archetype.component_index<data_y>()
     );
-
 
     return 0;
 }

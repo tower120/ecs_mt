@@ -71,7 +71,6 @@ namespace tower120::ecs::impl{
             return components_arrays[index].cast< std::vector<Component> >();
         }
 
-
         template<class Component, class Archetype>
         [[nodiscard]]
         std::vector<Component>& components(){
@@ -79,7 +78,6 @@ namespace tower120::ecs::impl{
             const std::size_t index = Archetype::template component_index<Component>();
             return components_arrays[index].cast< std::vector<Component> >();
         }
-
 
         // all components must be default constructible
 //        void emplace(entity entity){

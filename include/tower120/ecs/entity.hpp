@@ -4,6 +4,7 @@
 #include <deque>
 #include <vector>
 #include <cstdint>
+#include <cassert>
 
 namespace tower120::ecs{
 
@@ -68,6 +69,7 @@ namespace tower120::ecs{
         }
 
         void free(entity entity){
+            assert(data(entity).components_container == nullptr);
             entity_data& ed = data(entity);
 
             ed.components_container = nullptr;

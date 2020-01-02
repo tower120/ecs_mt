@@ -27,13 +27,9 @@ namespace tower120::ecs{
 
         template<class Range>
         explicit archetype(Range range) noexcept
-        {
-            //static_assert( std::is_same_v<decltype(*range.begin()), component_type_t> );
-            assert(std::size(range) <= max_components);
-
-            std::copy(range.begin(), range.end(), std::back_inserter(list));
-            std::sort(list.begin(), list.end());
-        }
+            : list(make_sorted_components_list(std::move(range)))
+            , hash(make_hash())
+        {}
 
         [[nodiscard]]
         const components_t& components() const noexcept { return list; }
@@ -63,9 +59,28 @@ namespace tower120::ecs{
             return !(*this==other);
         }
     private:
-        components_t list;
-    };
+        template<class Range>
+        components_t make_sorted_components_list(Range&& range) const noexcept {
+            assert(std::size(range) <= max_components);
 
+            components_t components;
+            std::copy(range.begin(), range.end(), std::back_inserter(components));
+            std::sort(components.begin(), components.end());
+            return components;
+        }
+        std::size_t make_hash() const noexcept {
+            return std::hash<std::string_view>{}(
+                std::string_view(reinterpret_cast<const char *>(list.data()), list.size()* sizeof(component_type))
+            );
+        }
+    // -----------------------------------
+    //           DATA
+    // -----------------------------------
+    private:
+        components_t list;
+    public:
+        const std::size_t hash;
+    };
 
     template<class ...Components>
     class archetype_t {
@@ -141,4 +156,13 @@ namespace tower120::ecs{
        using components = typename decltype(sort_components())::type;
     };
 */
+}
+
+namespace std{
+    template<>
+    struct hash<tower120::ecs::archetype>{
+        std::size_t operator()(const tower120::ecs::archetype& archetype) const noexcept {
+            return archetype.hash;
+        }
+    };
 }
