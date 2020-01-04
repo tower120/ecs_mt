@@ -3,3 +3,4 @@
  * remove "utils::invoke" usage
  * return std::span whenever possible,
  * rename acrhetype => any_arhcetype; archetype_t => acrhetype;
+ * add copyrights

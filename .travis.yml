@@ -1,0 +1,40 @@
+language: cpp
+
+dist: xenial
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - gcc
+  - clang
+
+env:
+  - BUILD_CONFIGURATION=Debug
+  - BUILD_CONFIGURATION=Release
+
+matrix:
+  include:
+    - env: BUILD_CONFIGURATION=Debug SAN=ASAN
+      os: linux
+      compiler: clang
+    - env: BUILD_CONFIGURATION=Debug SAN=MSAN
+      os: linux
+      compiler: clang
+    - env: BUILD_CONFIGURATION=Release SAN=ASAN
+      os: linux
+      compiler: clang
+    - env: BUILD_CONFIGURATION=Release SAN=MSAN
+      os: linux
+      compiler: clang
+
+script:
+  - mkdir build
+  - cd build
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DSAN=$SAN
+  - cmake --build .
+  - ctest --output-on-failure
+
+notifications:
+  email: false
