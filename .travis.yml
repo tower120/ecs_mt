@@ -28,7 +28,8 @@ matrix:
     - env: BUILD_CONFIGURATION=Release SAN=MSAN
       os: linux
       compiler: clang
-    - os: windows
+    - env: BUILD_CONFIGURATION=Debug
+      os: windows
 
 script:
   - mkdir build
