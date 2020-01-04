@@ -28,8 +28,11 @@ matrix:
     - env: BUILD_CONFIGURATION=Release SAN=MSAN
       os: linux
       compiler: clang
-    - env: BUILD_CONFIGURATION=Debug
-      os: windows
+      
+    # Windows
+    - os: windows
+      env:
+      - MSBUILD_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin"
 
 script:
   - mkdir build
