@@ -19,8 +19,10 @@ namespace tower120::ecs{
     // pointer to static constexpr may work wrong across dll boundaries
     // since each dll have its own set of statics. Initialization order and references may be not the same
     // need more stable way to get component id.
-    // Solution:
+    // Solution 1:
     //   pass ID as template argument and use it
+    // Solution 2:
+    //   Use hash from __FUNC_SIG__ / __FUNCTION___ ?
     template<class Component>
     class component_info{
     private:

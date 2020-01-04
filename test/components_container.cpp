@@ -19,7 +19,7 @@ int main() {
 
     entity_manager entity_data_manager;
     using Archetype = archetype_t<data_x, data_y>;
-    components_container container{entity_data_manager, Archetype::archetype};
+    components_container container{Archetype::archetype};
 
     entity entity = entity_data_manager.make();
 

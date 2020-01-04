@@ -30,9 +30,8 @@ namespace tower120::ecs::impl{
         components_container(const components_container&) = delete;
         components_container(components_container&&)      = delete;
 
-        components_container(entity_manager& entity_manager, const archetype& archetype)
+        components_container(const archetype& archetype)
             : archetype(archetype)
-            , entity_manager(entity_manager)
         {
             const auto& component_types = archetype.components();
 
@@ -50,14 +49,15 @@ namespace tower120::ecs::impl{
         template<class Component>
         [[nodiscard]]
         Component& component(entity entity){
-            const entity_data& entity_data = entity_manager.data(entity);
+            const entity_data& entity_data = *entity.data;
             assert(is_valid_entity(entity));
             return components<Component>()[entity_data.container_index];
         }
 
         template<class Component, class Archetype>
+        [[nodiscard]]
         Component& component(entity entity){
-            const entity_data& entity_data = entity_manager.data(entity);
+            const entity_data& entity_data = *entity.data;
             assert(is_valid_entity(entity));
             assert(Archetype::archetype == this->archetype);
             return components<Component, Archetype>()[entity_data.container_index];
@@ -88,7 +88,7 @@ namespace tower120::ecs::impl{
 
         template<class ...Components>
         void emplace(entity entity, Components...components){
-            entity_data& entity_data = entity_manager.data(entity);
+            entity_data& entity_data = *entity.data;
             using Archetype = archetype_t<Components...>;
             assert(Archetype::archetype == this->archetype);
             assert(entity_data.components_container == nullptr);
@@ -104,7 +104,7 @@ namespace tower120::ecs::impl{
 
         void erase(entity entity){
             assert(is_valid_entity(entity));
-            entity_data& entity_data = entity_manager.data(entity);
+            entity_data& entity_data = *entity.data;
 
             using namespace impl::utils;
 
@@ -123,12 +123,12 @@ namespace tower120::ecs::impl{
         template<class Archetype>
         void erase(entity entity){
             assert(is_valid_entity(entity));
-            entity_data& entity_data = entity_manager.data(entity);
-
             using namespace impl::utils;
 
+            entity_data* entity_data = entity.data;
+
             // do erase
-            const std::size_t index = entity_data.container_index;
+            const std::size_t index = entity_data->container_index;
             unordered_erase(entities, entities.begin() + index);
             foreach<typename Archetype::components>([&](auto type_constant){
                 using Component  = typename decltype(type_constant)::type;
@@ -138,7 +138,7 @@ namespace tower120::ecs::impl{
             assert(is_valid_components_matrix());
 
             // update entity
-            entity_data.components_container = nullptr;
+            entity_data->components_container = nullptr;
         }
 
     // -----------------------------------
@@ -147,7 +147,7 @@ namespace tower120::ecs::impl{
     private:
         [[nodiscard]]
         bool is_valid_entity(entity entity) const {
-            const entity_data& entity_data = entity_manager.data(entity);
+            const entity_data& entity_data = *entity.data;
                 if (entity_data.components_container != this) return false;
             const std::size_t index = entity_data.container_index;
                 if (index >= entities.size()) return false;
@@ -169,10 +169,7 @@ namespace tower120::ecs::impl{
     // -----------------------------------
     public:
         const archetype archetype;
-
     private:
-        entity_manager& entity_manager;     // TODO: remove
-
         std::vector<entity> entities;
         std::vector<any_vector> components_arrays;
     };
