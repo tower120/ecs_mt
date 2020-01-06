@@ -1,11 +1,13 @@
 #pragma once
 
+#include <optional>
+
 namespace tower120::ecs::impl::utils{
 
     namespace details{
         template<class T, class Tuple>
-        constexpr std::size_t tuple_index(){
-            int result = -1;
+        constexpr std::optional<std::size_t> tuple_index(){
+            std::optional<std::size_t> result;
 
             static_for< std::tuple_size_v<Tuple> >([&](auto integral_constant){
                 constexpr const std::size_t index = integral_constant.value;
@@ -20,9 +22,9 @@ namespace tower120::ecs::impl::utils{
 
     template<class T, class Tuple>
     constexpr std::size_t tuple_index(){
-        constexpr const int index = details::tuple_index<T, Tuple>();
-        static_assert(index >= 0);
-        return index;
+        constexpr const std::optional<std::size_t> index = details::tuple_index<T, Tuple>();
+        static_assert(index.has_value());
+        return *index;
     }
 
 }

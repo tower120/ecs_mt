@@ -30,10 +30,10 @@ matrix:
       compiler: clang
 
     # msvc
-    - os: windows
-      env: BUILD_CONFIGURATION=Debug
-    - os: windows
-      env: BUILD_CONFIGURATION=Release
+    #- os: windows
+    #  env: BUILD_CONFIGURATION=Debug
+    #- os: windows
+    #  env: BUILD_CONFIGURATION=Release
 
 script:
   - mkdir build
