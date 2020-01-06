@@ -87,14 +87,15 @@ namespace tower120::ecs::impl{
 //        }
 
         template<class ...Components>
-        void emplace(entity entity, Components...components){
+        void emplace(entity entity, Components...components_){
             entity_data& entity_data = *entity.data;
             using Archetype = archetype_t<Components...>;
             assert(Archetype::archetype == this->archetype);
             assert(entity_data.components_container == nullptr);
 
             entities.emplace_back(entity);
-            (this->components<Components, Archetype>().emplace_back( std::move(components) ), ...);
+            (this->components<Components, Archetype>().emplace_back( std::move(components_) ), ...);
+
             assert(is_valid_components_matrix());
 
             // update entity

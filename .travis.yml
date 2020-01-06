@@ -32,11 +32,8 @@ matrix:
     # msvc
     - os: windows
       env: BUILD_CONFIGURATION=Debug
-      - LABEL="windows msvc debug"
     - os: windows
-      env:
-        LABEL="windows msvc release"
-        BUILD_CONFIGURATION=Release
+      env: BUILD_CONFIGURATION=Release
 
 script:
   - mkdir build
