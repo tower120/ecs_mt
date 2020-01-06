@@ -31,9 +31,8 @@ matrix:
 
     # msvc
     - os: windows
-      env:
-        LABEL="windows msvc debug"
-        BUILD_CONFIGURATION=Debug
+      env: BUILD_CONFIGURATION=Debug
+      - LABEL="windows msvc debug"
     - os: windows
       env:
         LABEL="windows msvc release"
