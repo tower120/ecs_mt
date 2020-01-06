@@ -1,5 +1,7 @@
 #pragma once
 
+#include "impl/utils/numeric_cast.hpp"
+
 #include <cstdio>
 #include <deque>
 #include <vector>
@@ -54,7 +56,8 @@ namespace tower120::ecs{
                 free_list.pop_back();
                 return entity{*data};
             }
-            return entity{list.emplace_back(list.size())};
+            const std::uint32_t index = impl::utils::numeric_cast<std::uint32_t>(list.size());
+            return entity{list.emplace_back(index)};
         }
 
         void free(entity entity){
