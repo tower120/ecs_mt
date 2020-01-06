@@ -93,7 +93,7 @@ namespace tower120::ecs{
             constexpr const std::size_t i = tuple_index<Component, std::tuple<Components...>>();
             return std::get<i>(indices);
         }
-        inline static const archetype archetype{std::initializer_list<component_type>{component_type_of<Components>...}};
+        inline static const class archetype archetype{std::initializer_list<component_type>{component_type_of<Components>...}};
     private:
         inline static const std::tuple indices = []() noexcept {
             return std::tuple{
