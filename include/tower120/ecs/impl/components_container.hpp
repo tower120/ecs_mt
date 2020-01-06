@@ -5,6 +5,7 @@
 #include "../archetype.hpp"
 #include "utils/algorithm.hpp"
 #include "utils/type_constant.hpp"
+#include "utils/numeric_cast.hpp"
 
 #include <deque>
 #include <vector>
@@ -100,7 +101,7 @@ namespace tower120::ecs::impl{
 
             // update entity
             entity_data.components_container = this;
-            entity_data.container_index = entities.size() - 1;
+            entity_data.container_index = impl::utils::numeric_cast<std::uint32_t>(entities.size() - 1);
         }
 
         void erase(entity entity){
@@ -110,7 +111,7 @@ namespace tower120::ecs::impl{
             using namespace impl::utils;
 
             // do erase
-            const std::size_t index = entity_data.container_index;
+            const auto index = entity_data.container_index;
             unordered_erase(entities, entities.begin() + index);
             for(any_vector& component_array : components_arrays){
                 component_array.unordered_erase(index);
@@ -129,7 +130,7 @@ namespace tower120::ecs::impl{
             entity_data* entity_data = entity.data;
 
             // do erase
-            const std::size_t index = entity_data->container_index;
+            const auto index = entity_data->container_index;
             unordered_erase(entities, entities.begin() + index);
             foreach<typename Archetype::components>([&](auto type_constant){
                 using Component  = typename decltype(type_constant)::type;

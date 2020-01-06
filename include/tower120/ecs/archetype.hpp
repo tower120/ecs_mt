@@ -38,7 +38,9 @@ namespace tower120::ecs{
         std::size_t component_index(component_type component_type) const noexcept {
             const auto found = std::lower_bound(list.begin(), list.end(), component_type);
             assert(found != list.end() && *found == component_type);
-            return std::distance(list.begin(), found);
+            const auto index = std::distance(list.begin(), found);
+            assert(index>=0);
+            return impl::utils::numeric_cast<std::size_t>(index);
         }
 
         [[nodiscard]]
