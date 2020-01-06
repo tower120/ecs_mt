@@ -29,8 +29,15 @@ matrix:
       os: linux
       compiler: clang
 
-    # Windows
+    # msvc
     - os: windows
+      env:
+        LABEL="windows msvc debug"
+        BUILD_CONFIGURATION=Debug
+    - os: windows
+      env:
+        LABEL="windows msvc release"
+        BUILD_CONFIGURATION=Release
 
 script:
   - mkdir build
