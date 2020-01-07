@@ -1,7 +1,5 @@
 #pragma once
 
-#include <optional>
-
 namespace tower120::ecs::impl::utils{
 
     namespace details{

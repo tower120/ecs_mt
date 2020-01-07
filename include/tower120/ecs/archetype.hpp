@@ -90,10 +90,12 @@ namespace tower120::ecs{
         }
         inline static const class archetype_typeinfo typeinfo{std::initializer_list<component_typeinfo>{component_typeid<Components>...}};
     private:
-        inline static const std::tuple indices = []() noexcept {
-            return std::tuple{
+        inline static const auto& indices = []() noexcept -> const auto& {
+            // prevent static order initialization fiasco
+            static const std::tuple indices{
                 typeinfo.component_index(component_typeid<Components>)...
             };
+            return indices;
         }();
     };
 
