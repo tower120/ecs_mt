@@ -60,7 +60,7 @@ namespace tower120::ecs::impl{
         Component& component(entity entity){
             const entity_data& entity_data = *entity.data;
             assert(is_valid_entity(entity));
-            assert(Archetype::archetype == this->archetype);
+            assert(Archetype::typeinfo == this->archetype);
             return components<Component, Archetype>()[entity_data.container_index];
         }
 
