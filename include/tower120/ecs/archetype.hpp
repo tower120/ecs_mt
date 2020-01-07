@@ -4,11 +4,12 @@
 #include "impl/utils/static_vector.hpp"
 #include "impl/utils/constexpr_sort.hpp"
 #include "impl/utils/tuple.hpp"
+#include "component.hpp"
 
 #include <tuple>
 #include <algorithm>
 #include <cstring>
-#include "component.hpp"
+#include <string_view>
 
 namespace tower120::ecs{
 
