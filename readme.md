@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/tower120/ecs_mt.svg?branch=master)](https://travis-ci.org/tower120/ecs_mt)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/tower120/ecs_mt?branch=master&svg=true)](https://ci.appveyor.com/api/projects/status/github/tower120/ecs_mt?branch=master&svg=true)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/tower120/ecs_mt?branch=master&svg=true)](https://ci.appveyor.com/project/tower120/ecs-mt/branch/master)
 
 Header only multithread-oriented ECS (entity-component-system) library. C++17
 
