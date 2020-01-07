@@ -3,6 +3,8 @@
 #include "entity.hpp"
 #include "impl/components_container.hpp"
 
+#include <unordered_map>
+
 namespace tower120::ecs{
 
     class world {
