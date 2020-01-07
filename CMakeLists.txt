@@ -3,11 +3,18 @@ project(ecs_mt)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_compile_options(-Wall -Wextra -pedantic -Werror)
+if (MSVC)
+  add_compile_options(/W4 /WX)
+else()
+  add_compile_options(-Wall -Wextra -Wconversion -pedantic -Werror)
+endif()
+
 
 if (SAN STREQUAL "ASAN")
+  message("using ASAN")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak -fsanitize=undefined -fsanitize=integer -fsanitize=nullability -fno-omit-frame-pointer -g")
 elseif(SAN STREQUAL "MSAN")
+  message("using MSAN")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=memory -fno-omit-frame-pointer -g")
 endif()
 
