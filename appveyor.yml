@@ -15,7 +15,6 @@ build_script:
   - cmake --build . %CMAKE_BUILD_FLAGS%
 
 test_script:
-  # - ctest -C %CONFIGURATION% -VV
   - ctest --output-on-failure
 
 deploy: off

@@ -1,6 +1,4 @@
  * Implement, utilize chunks (for faster move between components_container s)
  * unique archetype_id + archetype_manager. Can be created only from main thread. ???
- * remove "utils::invoke" usage
  * return std::span whenever possible,
- * rename acrhetype => any_arhcetype; archetype_t => acrhetype;
  * add copyrights

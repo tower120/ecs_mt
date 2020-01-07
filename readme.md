@@ -1,9 +1,9 @@
 Header only multithread-oriented ECS (entity-component-system) library. C++17
 
 ### Tested on compilers:
-    * GCC
-    * CLANG
-    * MSVC 2019
+ * GCC
+ * CLANG
+ * MSVC 2019
 
 ### known issues
 

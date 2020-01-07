@@ -12,21 +12,14 @@
 
 namespace tower120::ecs{
 
-    template<class ...Components>
-    class archetype_t;
-
-
-    // rename to any_archetype ?
-    //
-
     // TODO : unique archetype_id + archetype_manager. Can be created only from main thread ? What for?
-    class archetype{
+    class archetype_typeinfo{
     public:
         static const constexpr std::size_t max_components = 8;
-        using components_t = chobo::static_vector<component_type, max_components>;
+        using components_t = chobo::static_vector<component_typeinfo, max_components>;
 
         template<class Range>
-        explicit archetype(Range range) noexcept
+        explicit archetype_typeinfo(Range range) noexcept
             : list(make_sorted_components_list(std::move(range)))
             , hash(make_hash())
         {}
@@ -35,7 +28,7 @@ namespace tower120::ecs{
         const components_t& components() const noexcept { return list; }
 
         [[nodiscard]]
-        std::size_t component_index(component_type component_type) const noexcept {
+        std::size_t component_index(component_typeinfo component_type) const noexcept {
             const auto found = std::lower_bound(list.begin(), list.end(), component_type);
             assert(found != list.end() && *found == component_type);
             const auto index = std::distance(list.begin(), found);
@@ -44,20 +37,20 @@ namespace tower120::ecs{
         }
 
         [[nodiscard]]
-        bool contains(component_type component_type) const {
+        bool contains(component_typeinfo component_type) const {
             return std::binary_search(list.begin(), list.end(), component_type);
         }
 
         [[nodiscard]]
-        bool operator==(const archetype& other) const noexcept {
+        bool operator==(const archetype_typeinfo& other) const noexcept {
             const auto size = list.size();
             if (size != other.list.size()) return false;
 
-            const auto result = std::memcmp(list.data(), other.list.data(), size * sizeof(component_type));
+            const auto result = std::memcmp(list.data(), other.list.data(), size * sizeof(component_typeinfo));
             return result == 0;
         }
         [[nodiscard]]
-        bool operator!=(const archetype& other) const noexcept {
+        bool operator!=(const archetype_typeinfo& other) const noexcept {
             return !(*this==other);
         }
     private:
@@ -72,7 +65,7 @@ namespace tower120::ecs{
         }
         std::size_t make_hash() const noexcept {
             return std::hash<std::string_view>{}(
-                std::string_view(reinterpret_cast<const char *>(list.data()), list.size()* sizeof(component_type))
+                std::string_view(reinterpret_cast<const char *>(list.data()), list.size()* sizeof(component_typeinfo))
             );
         }
     // -----------------------------------
@@ -85,7 +78,7 @@ namespace tower120::ecs{
     };
 
     template<class ...Components>
-    class archetype_t {
+    class archetype {
     public:
         using components = std::tuple<Components...>;
 
@@ -95,11 +88,11 @@ namespace tower120::ecs{
             constexpr const std::size_t i = tuple_index<Component, std::tuple<Components...>>();
             return std::get<i>(indices);
         }
-        inline static const class archetype archetype{std::initializer_list<component_type>{component_type_of<Components>...}};
+        inline static const class archetype_typeinfo typeinfo{std::initializer_list<component_typeinfo>{component_typeid<Components>...}};
     private:
         inline static const std::tuple indices = []() noexcept {
             return std::tuple{
-                archetype.component_index(component_type_of<Components>)...
+                typeinfo.component_index(component_typeid<Components>)...
             };
         }();
     };
@@ -162,8 +155,8 @@ namespace tower120::ecs{
 
 namespace std{
     template<>
-    struct hash<tower120::ecs::archetype>{
-        std::size_t operator()(const tower120::ecs::archetype& archetype) const noexcept {
+    struct hash<tower120::ecs::archetype_typeinfo>{
+        std::size_t operator()(const tower120::ecs::archetype_typeinfo& archetype) const noexcept {
             return archetype.hash;
         }
     };

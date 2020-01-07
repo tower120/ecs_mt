@@ -12,7 +12,7 @@ namespace tower120::ecs{
     };
 
     // TODO: make concrete type wrapper
-    using component_type = const component_type_data*;
+    using component_typeinfo = const component_type_data*;
 
 
     // TODO:
@@ -32,10 +32,10 @@ namespace tower120::ecs{
              }
         };
     public:
-         static constexpr const component_type type = &type_data;
+         static constexpr const component_typeinfo type = &type_data;
     };
 
     template<class Component>
-    constexpr const component_type component_type_of = component_info<Component>::type;
+    constexpr const component_typeinfo component_typeid = component_info<Component>::type;
 
 }

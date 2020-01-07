@@ -19,11 +19,11 @@ namespace tower120::ecs{
             entity entity = entity_manager.make();
 
             // search appropriate archetype
-            using Archetype = archetype_t<Components...>;
-            auto found = archetypes.find(Archetype::archetype);
+            using Archetype = archetype<Components...>;
+            auto found = archetypes.find(Archetype::typeinfo);
             components_container* container;
             if (found == archetypes.end()){
-                container = &make_archetype_container(Archetype::archetype);
+                container = &make_archetype_container(Archetype::typeinfo);
             } else {
                 container = &found->second;
             }
@@ -38,13 +38,13 @@ namespace tower120::ecs{
     //          IMPLEMENTATION
     // -----------------------------------
     private:
-        components_container& make_archetype_container(archetype archetype){
+        components_container& make_archetype_container(archetype_typeinfo archetype){
             // construct container per se
             auto pair = archetypes.emplace(archetype, archetype);   assert(pair.second);
             components_container& components_container = pair.first->second;
 
             // fill components matrix
-            for(component_type component_type : archetype.components()){
+            for(component_typeinfo component_type : archetype.components()){
                 components.emplace(component_type, &components_container);
             }
 
@@ -56,8 +56,8 @@ namespace tower120::ecs{
     // -----------------------------------
     private:
         entity_manager entity_manager;
-        std::unordered_map<archetype, components_container> archetypes;
-        std::unordered_multimap<component_type, components_container*> components;
+        std::unordered_map<archetype_typeinfo, components_container> archetypes;
+        std::unordered_multimap<component_typeinfo, components_container*> components;
     };
 
 }
