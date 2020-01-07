@@ -55,7 +55,7 @@ namespace tower120::ecs{
     //           DATA
     // -----------------------------------
     private:
-        entity_manager entity_manager;
+        class entity_manager entity_manager;
         std::unordered_map<archetype_typeinfo, components_container> archetypes;
         std::unordered_multimap<component_typeinfo, components_container*> components;
     };
