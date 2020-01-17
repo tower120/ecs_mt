@@ -52,9 +52,9 @@ namespace tower120::ecs::impl::utils{
         container.pop_back();
     }
 
-    template<class Key, class ... Args>
+    /*template<class Key, class ... Args>
     bool contains(const std::unordered_multimap<Key, Args...>& map, const Key& key){
         return map.find(key) != map.end();
-    }
+    }*/
 
 }
