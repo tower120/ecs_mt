@@ -3,6 +3,14 @@
 namespace tower120::ecs::impl::utils{
 
     namespace details{
+        template <typename> struct is_tuple: std::false_type {};
+        template <typename ...T> struct is_tuple<std::tuple<T...>>: std::true_type {};
+    }
+    template <class T>
+    constexpr const static bool is_tuple = details::is_tuple<std::decay_t<T>>::value;
+
+
+    namespace details{
         const constexpr std::size_t tuple_index_sentinel = std::numeric_limits<std::size_t>::max();
 
         template<class T, class Tuple>
@@ -19,7 +27,6 @@ namespace tower120::ecs::impl::utils{
             return result;
         }
     }
-
     template<class T, class Tuple>
     constexpr std::size_t tuple_index(){
         constexpr const std::size_t index = details::tuple_index<T, Tuple>();

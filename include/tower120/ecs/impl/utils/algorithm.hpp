@@ -6,14 +6,6 @@
 
 namespace tower120::ecs::impl::utils{
 
-    namespace details{
-        template <typename> struct is_tuple: std::false_type {};
-        template <typename ...T> struct is_tuple<std::tuple<T...>>: std::true_type {};
-    }
-
-    template <class T>
-    constexpr const static bool is_tuple = details::is_tuple<std::decay_t<T>>::value;
-
     template<int N, class Closure>
     constexpr void static_for(Closure&& closure){
         std::apply([&](auto ...integral_constants){
@@ -26,22 +18,28 @@ namespace tower120::ecs::impl::utils{
         ( closure(std::forward<Args>(args)) ,  ...);
     }
 
+    template<class Arg, class ...Args, class Closure>
+    constexpr void foreach(Closure&& closure){
+        foreach(std::forward<Closure>(closure), type_constant<Arg>{}, type_constant<Args>{}...);
+    }
+
+
     template<class Closure, class ...Args>
-    constexpr void foreach(Closure&& closure, std::tuple<Args...>& tuple){
+    constexpr void foreach_tuple(Closure&& closure, std::tuple<Args...>& tuple){
         std::apply([&](auto&... args){
-            foreach(std::forward<Closure>(closure), args...);
+            ( closure(args),  ...);
         }, tuple);
     }
 
-    /*template<class Arg, class ...Args, class Closure,
-        typename = std::enable_if_t<!is_tuple<Arg>>>
-    constexpr void foreach(Closure&& closure){
-        foreach(std::forward<Closure>(closure), type_constant<Arg>{}, type_constant<Args>{}...);
-    }*/
+    template<class Closure, class ...Args>
+    constexpr void foreach_tuple(Closure&& closure, std::tuple<Args...> tuple){
+        std::apply([&](auto&... args){
+            ( closure(args),  ...);
+        }, tuple);
+    }
 
-    template<class Tuple, class Closure,
-        typename = std::enable_if_t<is_tuple<Tuple>>>
-    constexpr void foreach(Closure&& closure){
+    template<class Tuple, class Closure>
+    constexpr void foreach_tuple(Closure&& closure){
         static_for<std::tuple_size_v<Tuple>>([&](auto integral_constant){
             using T = std::tuple_element_t<integral_constant.value, Tuple>;
             closure( type_constant<T>{} );
@@ -52,6 +50,11 @@ namespace tower120::ecs::impl::utils{
     void unordered_erase(Container& container, Iterator iter){
         *iter = std::move(container.back());
         container.pop_back();
+    }
+
+    template<class Key, class ... Args>
+    bool contains(const std::unordered_multimap<Key, Args...>& map, const Key& key){
+        return map.find(key) != map.end();
     }
 
 }

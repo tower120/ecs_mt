@@ -114,39 +114,9 @@
 #include <cstddef>
 #include <iterator>
 
-#define CHOBO_STATIC_VECTOR_ERROR_HANDLING_NONE  0
-#define CHOBO_STATIC_VECTOR_ERROR_HANDLING_THROW 1
-#define CHOBO_STATIC_VECTOR_ERROR_HANDLING_ASSERT 2
-#define CHOBO_STATIC_VECTOR_ERROR_HANDLING_RESCUE 3
-#define CHOBO_STATIC_VECTOR_ERROR_HANDLING_ASSERT_AND_THROW 4
-#define CHOBO_STATIC_VECTOR_ERROR_HANDLING_ASSERT_AND_RESCUE 5
 
-#if !defined(CHOBO_STATIC_VECTOR_ERROR_HANDLING)
-#   define CHOBO_STATIC_VECTOR_ERROR_HANDLING CHOBO_STATIC_VECTOR_ERROR_HANDLING_THROW
-#endif
-
-#if CHOBO_STATIC_VECTOR_ERROR_HANDLING == CHOBO_STATIC_VECTOR_ERROR_HANDLING_NONE
-#   define _CHOBO_STATIC_VECTOR_OUT_OF_RANGE_IF(cond, rescue_return)
-#elif CHOBO_STATIC_VECTOR_ERROR_HANDLING == CHOBO_STATIC_VECTOR_ERROR_HANDLING_THROW
-#   include <stdexcept>
-#   define _CHOBO_STATIC_VECTOR_OUT_OF_RANGE_IF(cond, rescue_return) if (cond) throw std::out_of_range("chobo::static_vector out of range")
-#elif CHOBO_STATIC_VECTOR_ERROR_HANDLING == CHOBO_STATIC_VECTOR_ERROR_HANDLING_ASSERT
-#   include <cassert>
-#   define _CHOBO_STATIC_VECTOR_OUT_OF_RANGE_IF(cond, rescue_return) assert(!(cond) && "chobo::static_vector out of range")
-#elif CHOBO_STATIC_VECTOR_ERROR_HANDLING == CHOBO_STATIC_VECTOR_ERROR_HANDLING_RESCUE
-#   define _CHOBO_STATIC_VECTOR_OUT_OF_RANGE_IF(cond, rescue_return) if (cond) return rescue_return
-#elif CHOBO_STATIC_VECTOR_ERROR_HANDLING == CHOBO_STATIC_VECTOR_ERROR_HANDLING_ASSERT_AND_THROW
-#   include <stdexcept>
-#   include <cassert>
-#   define _CHOBO_STATIC_VECTOR_OUT_OF_RANGE_IF(cond, rescue_return) \
-    do { if (cond) { assert(false && "chobo::static_vector out of range"); throw std::out_of_range("chobo::static_vector out of range"); } } while(false)
-#elif CHOBO_STATIC_VECTOR_ERROR_HANDLING == CHOBO_STATIC_VECTOR_ERROR_HANDLING_ASSERT_AND_RESCUE
-#   include <cassert>
-#   define _CHOBO_STATIC_VECTOR_OUT_OF_RANGE_IF(cond, rescue_return) \
-    do { if (cond) { assert(false && "chobo::static_vector out of range"); return rescue_return; } } while(false)
-#else
-#error "Unknown CHOBO_STATIC_VECTOR_ERRROR_HANDLING"
-#endif
+#include <cassert>
+#define _CHOBO_STATIC_VECTOR_OUT_OF_RANGE_IF(cond, rescue_return) assert(!(cond) && "chobo::static_vector out of range")
 
 
 #if defined(CHOBO_STATIC_VECTOR_NO_DEBUG_BOUNDS_CHECK)

@@ -14,6 +14,7 @@ namespace tower120::ecs{
         class components_container;
     }
     class entity_manager;
+    class world;
 
 
     struct entity_data{
@@ -31,6 +32,7 @@ namespace tower120::ecs{
     class entity{
         friend entity_manager;
         friend impl::components_container;
+        friend world;
         explicit entity(entity_data& data) noexcept : data(&data){}
     public:
         bool operator==(const entity& other) const noexcept {
