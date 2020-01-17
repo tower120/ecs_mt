@@ -90,7 +90,8 @@ namespace tower120::ecs{
         bool is_valid_components() const {
             // count total components count
             std::size_t total_components = 0;
-            for(auto&[arch_type, _] : archetypes){
+            for(const auto& key_value : archetypes){
+                const archetype_typeinfo& arch_type = key_value.first;
                 total_components += arch_type.components().size();
 
                 // each archetype must have exactly one component
@@ -153,10 +154,11 @@ namespace tower120::ecs{
             }
 
             // 2. Traverse it
-            for(auto&[_,component]  : min_range){
-                if (!check_container(*component)) continue;
+            for(auto& key_value : min_range){
+                components_container& component = *key_value.second;
+                if (!check_container(component)) continue;
 
-                const bool proceed = closure(*component);
+                const bool proceed = closure(component);
                 if (!proceed) break;
             }
         }

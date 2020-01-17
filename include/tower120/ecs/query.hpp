@@ -5,6 +5,7 @@
 #include "impl/components_container.hpp"
 #include <tower120/ecs/impl/utils/algorithm.hpp>
 #include <tower120/ecs/impl/utils/subrange.hpp>
+#include <tower120/ecs/impl/utils/span.hpp>
 #include <tower120/ecs/impl/utils/static_vector.hpp>
 #include <tower120/ecs/impl/utils/basic_iterator.hpp>
 
