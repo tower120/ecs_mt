@@ -30,7 +30,7 @@ namespace tower120::ecs::impl::utils{
     template<class T, class Tuple>
     constexpr std::size_t tuple_index(){
         constexpr const std::size_t index = details::tuple_index<T, Tuple>();
-        static_assert(index != details::tuple_index_sentinel);
+        static_assert(index != details::tuple_index_sentinel, "tuple_index not found element type in tuple.");
         return index;
     }
 

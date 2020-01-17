@@ -142,7 +142,7 @@ namespace tower120::ecs::impl{
             // do erase
             const auto index = entity_data->container_index;
             unordered_erase(m_entities, m_entities.begin() + index);
-            foreach<typename Archetype::components>([&](auto type_constant){
+            foreach_tuple<typename Archetype::components>([&](auto type_constant){
                 using Component  = typename decltype(type_constant)::type;
                 auto& components = this->components<Component, Archetype>();
                 unordered_erase(components, components.begin() + index );
