@@ -46,6 +46,22 @@ namespace tower120::ecs::impl::utils{
         });
     }
 
+
+    namespace details{
+        template<class Closure, class ...Args>
+        constexpr void apply_tuple(Closure&& closure, type_constant<std::tuple<Args...>>){
+            std::apply(
+                std::forward<Closure>(closure),
+                std::tuple< type_constant<Args>... >{}
+            );
+        }
+    }
+
+    template<class Tuple, class Closure>
+    constexpr void apply_tuple(Closure&& closure){
+        details::apply_tuple(std::forward<Closure>(closure), type_constant<Tuple>{});
+    }
+
     template<class Container, class Iterator>
     void unordered_erase(Container& container, Iterator iter){
         *iter = std::move(container.back());

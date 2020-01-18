@@ -1,7 +1,8 @@
 #include <tower120/ecs/world.hpp>
+#include <tower120/ecs/entity.hpp>
+#include <tower120/ecs/query.hpp>
 #include "test_utils.hpp"
 
-using namespace tower120::ecs;
 
 struct data_x{
     int x;
@@ -9,9 +10,14 @@ struct data_x{
 struct data_y{
     int y;
 };
+struct data_z{
+    int z;
+};
 
 
 void test_make_destroy_entity(){
+    using namespace tower120::ecs;
+
     world world;
     entity ent = world.make_entity(data_x{1}, data_y{2});
     world.destroy_entity(ent);
@@ -19,52 +25,52 @@ void test_make_destroy_entity(){
 
 
 void test_containers_query(){
-    world world;
+     tower120::ecs::world world;
 
-    // test query
     world.make_entity(data_x{11}, data_y{21});
     world.make_entity(data_x{12});
     world.make_entity(data_x{13}, data_y{23});
 
-    /*world.query_foreach_container(
-        std::array{component_typeid<data_x>, component_typeid<data_y>},
-        std::array<component_typeinfo, 0>{},
-        [](impl::components_container& container) -> bool {
-            for(data_x& x : container.components<data_x>()){
-                std::cout << x.x  << ",";
-            }
+    // access query through ADL
+
+    // test foreach
+    {
+        std::vector<int> xs, ys;
+        query(world).foreach([&](const data_x& x, data_y& y) -> bool /*proceed*/{
+            xs.emplace_back(x.x);
+            ys.emplace_back(y.y);
             return true;
-        }
-    );*/
-
-
-    // TODO: test foreach()
-
-
-    auto result = world.query<data_x>().contains<data_y>().select();
-    /*auto result = world.query<data_x>().contains<data_y>().select();
-    auto result = world.query<data_x>().contains<data_y>().foreach([](){});
-
-    query_result = query_t(world).select<data_x, data_y>();
-    query_result = query_t(world).contains<data_y>().select<data_x, data_y>();
-
-    query_t(world).foreach([](data_x&, data_y&){});
-    query_t(world).foreach_container();*/
-
-
-    /*auto first = *result.begin();
-    auto sent  = result.end();
-
-    (void)first;
-    (void)sent;*/
-
-    //for(auto[ent, d_x] : result){
-    for(auto pair : result){
-        (void)pair;
-        std::cout << "";
-        //d_x.x += 2;
+        });
+        REQUIRE_EQUAL(xs, {11,13});
+        REQUIRE_EQUAL(ys, {21,23});
+    }
+    {
+        std::vector<int> xs, ys;
+        query(world).foreach([&](tower120::ecs::entity, const data_x& x, data_y& y){
+            xs.emplace_back(x.x);
+            ys.emplace_back(y.y);
+        });
+        REQUIRE_EQUAL(xs, {11,13});
+        REQUIRE_EQUAL(ys, {21,23});
     }
 
+    // test query_result
+    {
+        world.make_entity(data_x{14}, data_y{24}, data_z{34});
+
+        tower120::ecs::query_result result =
+            query(world)
+            .contains<data_y>()
+            .not_contains(tower120::ecs::component_typeid<data_z>)
+            .select<data_x>();
+
+        std::vector<int> xs;
+        for(auto&&[ent, d_x] : result){
+            (void)ent;
+            xs.emplace_back(d_x.x);
+        }
+        REQUIRE_EQUAL(xs, {11,13});
+    }
 }
 
 

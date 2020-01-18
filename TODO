@@ -5,10 +5,5 @@
  * move out components_container from impl + make container_view
  * add copyrights
  * container view
- * change query api to:
-    world.query().select<data_x, data_y>();     // ??
-    query(world).select<data_x, data_y>();
-    query(world).contains<data_y>().select<data_x, data_y>();
-    query(world).foreach_container();
-    query(world).foreach([](data_x&, data_y&){});
  * move impl::utils -> impl
+ * query = static_query/dynamic_query ?

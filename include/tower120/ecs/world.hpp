@@ -1,7 +1,7 @@
 #pragma once
 
 #include "entity.hpp"
-#include "query.hpp"
+//#include "query.hpp"
 #include "impl/components_container.hpp"
 #include <tower120/ecs/impl/utils/subrange.hpp>
 
@@ -9,8 +9,10 @@
 
 namespace tower120::ecs{
 
+    class query_t;
+
     class world {
-        template<class, class...> friend class query_t;
+        friend query_t;
     // -----------------------------------
     //            TYPES
     // -----------------------------------
@@ -19,6 +21,10 @@ namespace tower120::ecs{
     //          INTERFACE
     // -----------------------------------
     public:
+        world() = default;
+        world(const world&) = delete;
+        world(world&&)      = delete;
+
         template<class ...Components>
         entity make_entity(Components... components){
             entity entity = entity_manager.make();
@@ -50,10 +56,10 @@ namespace tower120::ecs{
         }
 
 
-        template<class ...GetComponents>
+        /*template<class ...GetComponents>
         query_t<world, GetComponents...> query(){
             return query_t<world, GetComponents...>{*this};
-        }
+        }*/
 
     // -----------------------------------
     //          IMPLEMENTATION
