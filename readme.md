@@ -7,6 +7,8 @@ Tries to follow Unity's ECS archetype data struct (components grouped by "entity
 
 Work in progress....
 
+[Documentation here](https://ecs-mt.readthedocs.io/)
+
 ### Tested on compilers:
  * GCC 7.3
  * CLANG 7.0
