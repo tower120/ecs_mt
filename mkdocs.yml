@@ -1,5 +1,0 @@
-site_name: ECS MT
-repo_url: https://github.com/tower120/ecs_mt
-nav:
-  - Home: index.md
-theme: readthedocs

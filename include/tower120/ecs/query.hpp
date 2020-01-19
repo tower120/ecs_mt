@@ -92,8 +92,8 @@ namespace tower120::ecs{
 
     class query_t{
     public:
-        query_t(const query_t&) = delete;
-        query_t(query_t&&)      = delete;
+        /*query_t(const query_t&) = delete;
+        query_t(query_t&&)      = delete;*/
 
         explicit query_t(world& w) noexcept
             : w(&w)
