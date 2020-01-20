@@ -56,10 +56,15 @@ namespace tower120::ecs{
         }
 
 
-        /*template<class ...GetComponents>
-        query_t<world, GetComponents...> query(){
-            return query_t<world, GetComponents...>{*this};
-        }*/
+//        template<class ...RemoveComponents, class ...AddComponents>
+//        void change_components(entity ent, AddComponents... add_components){
+//            impl::components_container& components_container = *ent.data->components_container;
+//            components_container.archetype
+//
+//            // 1. Remove
+//
+//            // 2. Move rest to new archetype and add necessary components
+//        }
 
     // -----------------------------------
     //          IMPLEMENTATION

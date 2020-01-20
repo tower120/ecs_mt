@@ -8,14 +8,14 @@
    :maxdepth: 2
 
    self
-   ecs  
+   ecs
+   world
    query
 
 Overview
 =========
 
-ECS MT is header only Entity Component System library with multithreading and reactivity in mind.
-
+ECS MT is C++ header only Entity Component System library with multithreading and reactivity in mind.
 
 Code
 -----

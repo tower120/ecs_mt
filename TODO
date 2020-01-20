@@ -1,5 +1,5 @@
  * Implement, utilize chunks (for faster move between components_container s)
- * Component type id from compile time hash.
+ * Component type id from compile time hash. archetypes semi compile time.
  * unique archetype_id + archetype_manager. Can be created only from main thread. ???
  * return std::span whenever possible,
  * move out components_container from impl + make container_view
@@ -7,3 +7,4 @@
  * container view
  * move impl::utils -> impl
  * query = static_query/dynamic_query ?
+ * unify world:: add_components + remove_components
