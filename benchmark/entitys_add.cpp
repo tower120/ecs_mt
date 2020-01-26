@@ -10,7 +10,7 @@ struct data_y{ std::size_t y;};
 struct data_z{ std::size_t z;};
 
 int main(){
-    const std::size_t times = 1;
+    const std::size_t times = 100;
     const std::size_t count = 100'000;
 
     {
@@ -22,7 +22,7 @@ int main(){
                 ys.push_back(data_y{i});
             }
         });
-        std::cout << "vector emplace_back : " << t << std::endl;
+        std::cout << "vector emplace_back : " << t.count() << std::endl;
     }
 
     {
@@ -33,23 +33,27 @@ int main(){
                 world.make_entity(data_x{i}, data_y{i});
             }
         });
-        std::cout << "world make_entity : " << t << std::endl;
+        std::cout << "world make_entity : " << t.count() << std::endl;
     }
 
     {
-        world world;
-        std::vector<entity> entities;
-        for(std::size_t i = 0; i < count;++i){
-            entities.push_back(
-                world.make_entity(data_x{i})
-            );
-        }
-        const auto t = benchmark(times, [&](){
+        std::chrono::high_resolution_clock::time_point::duration t = std::chrono::high_resolution_clock::time_point::duration::zero();
+        for(std::size_t k = 0 ; k < times;++k){
+            world world;
+            std::vector<entity> entities;
             for(std::size_t i = 0; i < count;++i){
-                world.change_components(entities[i], data_y{i});
+                entities.push_back(
+                    world.make_entity(data_x{i})
+                );
             }
-        });
-        std::cout << "world change_components : " << t << std::endl;
+            t += measure<std::chrono::high_resolution_clock::time_point::duration>([&](){
+                for(std::size_t i = 0; i < count;++i){
+                    world.change_components(entities[i], data_y{i});
+                }
+            });
+        }
+        std::cout << "world change_components : " << std::chrono::duration_cast<std::chrono::milliseconds>(t).count() << std::endl;
+
     }
 
     return 0;
