@@ -15,6 +15,7 @@ namespace tower120::ecs{
     }
     class entity_manager;
     class world;
+    class archetype_typeinfo;
 
 
     struct entity_data{
@@ -24,8 +25,8 @@ namespace tower120::ecs{
             : entity_index(entity_index) {}
 
         impl::components_container* components_container = nullptr;
-        std::uint32_t container_index;
-        std::uint32_t entity_index;
+        std::uint32_t container_index;      // index in components_container
+        std::uint32_t entity_index;         // index in entity_manager
     };
 
 
@@ -33,14 +34,43 @@ namespace tower120::ecs{
         friend entity_manager;
         friend impl::components_container;
         friend world;
-        explicit entity(entity_data& data) noexcept : data(&data){}
+        constexpr explicit entity(entity_data& data) noexcept : data(&data){}
     public:
-        bool operator==(const entity& other) const noexcept {
+        [[nodiscard]]
+        constexpr bool operator==(const entity& other) const noexcept {
             return data == other.data;
         }
-        bool operator!=(const entity& other) const noexcept {
+
+        [[nodiscard]]
+        constexpr bool operator!=(const entity& other) const noexcept {
             return !(*this == other);
         }
+
+        [[nodiscard]]
+        constexpr explicit operator bool() const noexcept{
+            return data->components_container != nullptr;
+        }
+
+        [[nodiscard]]
+        const archetype_typeinfo& archetype() const noexcept{
+            return get_archetype(this);
+        }
+
+        template<class Component>
+        [[nodiscard]]
+        Component& component(){
+            return get_component<Component>(this);
+        }
+    private:
+        template<class Self>
+        static const archetype_typeinfo& get_archetype(const Self* self) noexcept {
+            return self->data->components_container->archetype;
+        }
+        template<class Component, class Self>
+        static decltype(auto) get_component(Self* self){
+            return self->data->components_container->template component<Component>(*self);
+        }
+
     private:
         entity_data* data;  // not null
     };

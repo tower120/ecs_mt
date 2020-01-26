@@ -1,8 +1,8 @@
 #pragma once
 
 #include <tower120/ecs/impl/utils/algorithm.hpp>
+#include <tower120/ecs/impl/utils/output_iterator.hpp>
 #include "impl/utils/static_vector.hpp"
-#include "impl/utils/constexpr_sort.hpp"
 #include "impl/utils/tuple.hpp"
 #include "component.hpp"
 
@@ -13,21 +13,30 @@
 
 namespace tower120::ecs{
 
+    template <class ...Components> class archetype;
+
     // TODO : unique archetype_id + archetype_manager. Can be created only from main thread ? What for?
     class archetype_typeinfo{
+        template <class ...Components> friend class archetype;
+    // -----------------------------------------------------
+    //                      INTERFACE
+    // -----------------------------------------------------
+    private:
+        archetype_typeinfo() = default;
+
     public:
+        archetype_typeinfo(std::initializer_list<component_typeinfo> range) noexcept
+            : list(make_sorted_components_list(std::move(range)))
+            , m_hash(make_hash())
+        {}
+
         static const constexpr std::size_t max_components = 8;
         using components_t = chobo::static_vector<component_typeinfo, max_components>;
-
-        template<class Range>
-        explicit archetype_typeinfo(Range range) noexcept
-            : list(make_sorted_components_list(std::move(range)))
-            , hash(make_hash())
-        {}
 
         [[nodiscard]]
         const components_t& components() const noexcept { return list; }
 
+        /// Component MUST EXISTS
         [[nodiscard]]
         std::size_t component_index(component_typeinfo component_type) const noexcept {
             const auto found = std::lower_bound(list.begin(), list.end(), component_type);
@@ -37,9 +46,52 @@ namespace tower120::ecs{
             return impl::utils::numeric_cast<std::size_t>(index);
         }
 
+        /// Components MUST EXISTS
+        template<class ...Components>
+        [[nodiscard]]
+        std::array<std::size_t, sizeof...(Components)> components_indexes() const noexcept {
+            using namespace impl::utils;
+            std::array<std::size_t, sizeof...(Components)> out;
+            std::size_t out_index = 0;
+            set_to_set_map(
+                components(),
+                archetype<Components...>::typeinfo.components(),
+                output_iterator([&](auto iter_pair) {
+                    const std::size_t index = numeric_cast<std::size_t>(std::distance(list.begin(), iter_pair.first));
+                    out[out_index] = index;
+                    ++out_index;
+                })
+            );
+            assert(out.size() == sizeof...(Components));
+            return out; // NRVO
+        }
+
         [[nodiscard]]
         bool contains(component_typeinfo component_type) const {
             return std::binary_search(list.begin(), list.end(), component_type);
+        }
+
+        // archetype "arithmetic"
+        [[nodiscard]]
+        archetype_typeinfo operator+(const archetype_typeinfo& other) const {
+            archetype_typeinfo out;
+            std::merge(
+                this->list.begin(), this->list.end(),
+                other.list.begin(), other.list.end(),
+                std::back_inserter(out.list));
+            out.m_hash = out.make_hash();
+            return out;
+        }
+
+        [[nodiscard]]
+        archetype_typeinfo operator-(const archetype_typeinfo& other) const {
+            archetype_typeinfo out;
+            std::set_difference(
+                this->list.begin(), this->list.end(),
+                other.list.begin(), other.list.end(),
+                std::back_inserter(out.list));
+            out.m_hash = out.make_hash();
+            return out;
         }
 
         [[nodiscard]]
@@ -54,6 +106,12 @@ namespace tower120::ecs{
         bool operator!=(const archetype_typeinfo& other) const noexcept {
             return !(*this==other);
         }
+
+        [[nodiscard]]
+        std::size_t hash() const noexcept {
+            return m_hash;
+        }
+
     private:
         template<class Range>
         components_t make_sorted_components_list(Range&& range) const noexcept {
@@ -74,8 +132,7 @@ namespace tower120::ecs{
     // -----------------------------------
     private:
         components_t list;
-    public:
-        const std::size_t hash;
+        std::size_t m_hash;
     };
 
     template<class ...Components>
@@ -84,12 +141,13 @@ namespace tower120::ecs{
         using components = std::tuple<Components...>;
 
         template<class Component>
-        [[nodiscard]] static std::size_t component_index() noexcept {
+        [[nodiscard]]
+        static std::size_t component_index() noexcept {
             using namespace impl::utils;
             constexpr const std::size_t i = tuple_index<Component, std::tuple<Components...>>();
             return std::get<i>(indices);
         }
-        inline static const class archetype_typeinfo typeinfo{std::initializer_list<component_typeinfo>{component_typeid<Components>...}};
+        inline static const class archetype_typeinfo typeinfo{component_typeid<Components>...};
     private:
         inline static const auto& indices = []() noexcept -> const auto& {
             // prevent static order initialization fiasco
@@ -160,7 +218,7 @@ namespace std{
     template<>
     struct hash<tower120::ecs::archetype_typeinfo>{
         std::size_t operator()(const tower120::ecs::archetype_typeinfo& archetype) const noexcept {
-            return archetype.hash;
+            return archetype.hash();
         }
     };
 }

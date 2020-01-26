@@ -7,4 +7,10 @@
  * container view
  * move impl::utils -> impl
  * query = static_query/dynamic_query ?
- * unify world:: add_components + remove_components
+ * benchmark move_entity vs emplace
+ * world::components change std::unordered_multimap<component_typeinfo, components_container*>
+    =>
+    std::unordered_multimap<component_typeinfo, std::vector<components_container*> /*sorted*/ >
+
+    O(N) add/remove components_container but fast query component group
+ * expose entity_data

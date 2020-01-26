@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tower120/ecs/impl/utils/algorithm.hpp>
+
 #include <vector>
 #include <cstddef>
 #include <typeindex>
@@ -17,10 +19,10 @@ namespace tower120::ecs::impl{
         using size_t = std::size_t(*)(const void* any_container);
         const size_t size;
 
-        using unorderd_erase_t = void(*)(void* any_container, std::size_t index);
+        using unorderd_erase_t = void(*)(void* any_container, std::uint32_t index);
         const unorderd_erase_t unordered_erase;
 
-        using unordered_move_back_t = void(*)(void* any_container_from, void* any_container_to, std::size_t index);
+        using unordered_move_back_t = void(*)(void* any_container_from, void* any_container_to, std::uint32_t index);
         const unordered_move_back_t unordered_move_back;
 
         using destructor_t = void(*)(void* any_container);
@@ -76,11 +78,11 @@ namespace tower120::ecs::impl{
             return info.size(&storage);
         }
 
-        void unordered_erase(std::size_t index){
+        void unordered_erase(std::uint32_t index){
             info.unordered_erase(&storage, index);
         }
 
-        void unordered_move_back(static_any_contiguous_container& to, std::size_t index){
+        void unordered_move_back(static_any_contiguous_container& to, std::uint32_t index){
             info.unordered_move_back(&storage, &to.storage, index);
         }
 
@@ -108,17 +110,20 @@ namespace tower120::ecs::impl{
                     const Container& container = *static_cast<const Container*>(any_container);
                     return container.size();
                 },
-                /*.unordered_erase = */ [](void* any_container, std::size_t index){
+                /*.unordered_erase = */ [](void* any_container, std::uint32_t index){
                     Container& container = *static_cast<Container*>(any_container);
-                    container[index] = std::move(container.back());
-                    container.pop_back();
+                    tower120::ecs::impl::utils::
+                        unordered_erase(container, container.begin() + index);
+                    /*container[index] = std::move(container.back());
+                    container.pop_back();*/
                 },
-                /*.unordered_move_back = */ [](void* any_container_from, void* any_container_to, std::size_t index){
+                /*.unordered_move_back = */ [](void* any_container_from, void* any_container_to, std::uint32_t index){
                     Container& container_from = *static_cast<Container*>(any_container_from);
                     Container& container_to   = *static_cast<Container*>(any_container_to);
-
-                    container_to.push_back(std::move(container_from[index]));
-                    info.unordered_erase(any_container_from, index);
+                    tower120::ecs::impl::utils::
+                        unordered_move_back(container_from, container_to, container_from.begin() + index);
+                    /*container_to.push_back(std::move(container_from[index]));
+                    info.unordered_erase(any_container_from, index);*/
                 },
                 /*.destructor = */ [](void* any_container){
                     Container& container = *static_cast<Container*>(any_container);
