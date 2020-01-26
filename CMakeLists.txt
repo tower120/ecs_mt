@@ -24,7 +24,7 @@ file(GLOB_RECURSE INCLUDE "include/*.hpp")
 
 # ----- BENCHMARK -------
 
-#add_subdirectory(benchmark)
+add_subdirectory(benchmark)
 
 # ----- TEST -------
 

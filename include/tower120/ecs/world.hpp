@@ -1,7 +1,6 @@
 #pragma once
 
 #include "entity.hpp"
-//#include "query.hpp"
 #include "impl/components_container.hpp"
 #include <tower120/ecs/impl/utils/subrange.hpp>
 

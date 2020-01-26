@@ -162,8 +162,8 @@ namespace tower120::ecs::impl{
                 - tower120::ecs::archetype<RemoveComponents...>::typeinfo
                 == other.archetype);
             using namespace impl::utils;
-            const auto* entity_data =  entity.data;
-            const auto element_index = entity_data->container_index;        // entity.data cause ICE in GCC
+            entity_data* entity_data = entity.data;
+            const auto element_index = entity_data->container_index;        // entity.data-> cause ICE in GCC
 
             // 1. Move whatever we can
             const auto container_move_entity = [&](auto&& iter_pair){
@@ -179,7 +179,13 @@ namespace tower120::ecs::impl{
                 other.archetype.components(),
                 output_iterator(std::move(container_move_entity))
             );
-            unordered_move_back(m_entities, other.m_entities, m_entities.begin() + element_index);
+            // unordered_move entity to other
+            other.m_entities.push_back(std::move(m_entities[element_index]));
+            if (element_index != size()){
+                m_entities[element_index] = std::move(m_entities.back());
+                m_entities[element_index].data->container_index = element_index;   // Update moved (previously last) entity
+            }
+            m_entities.pop_back();
 
             // 2. Remove
             set_to_set_map(
@@ -212,8 +218,8 @@ namespace tower120::ecs::impl{
             assert(other.is_valid_components_matrix());
 
             // update entity
-            entity.data->components_container = &other;
-            entity.data->container_index = numeric_cast<std::uint32_t>(other.m_entities.size() - 1);
+            entity_data->components_container = &other;
+            entity_data->container_index = numeric_cast<std::uint32_t>(other.m_entities.size() - 1);
         }
 
     // -----------------------------------
