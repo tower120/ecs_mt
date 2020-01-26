@@ -14,7 +14,6 @@ int main(){
     std::vector<int> list2 = {20,45,50};
     std::vector<int> out;
 
-
     std::set_intersection(
         list1.begin(), list1.end(),
         list2.begin(), list2.end(),
