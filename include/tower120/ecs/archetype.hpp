@@ -2,6 +2,7 @@
 
 #include <tower120/ecs/impl/utils/algorithm.hpp>
 #include <tower120/ecs/impl/utils/output_iterator.hpp>
+#include <tower120/ecs/impl/utils/numeric_cast.hpp>
 #include "impl/utils/static_vector.hpp"
 #include "impl/utils/tuple.hpp"
 #include "component.hpp"

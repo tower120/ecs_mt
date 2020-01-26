@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <tower120/ecs/impl/static_any_contiguous_container.hpp>
-#include "entity.hpp"
 
 namespace tower120::ecs{
 

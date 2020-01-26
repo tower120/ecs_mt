@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <algorithm>
 
 namespace detail{
     extern void require_failed(char const *expr, char const *file, int line){
