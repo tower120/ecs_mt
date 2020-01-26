@@ -162,7 +162,8 @@ namespace tower120::ecs::impl{
                 - tower120::ecs::archetype<RemoveComponents...>::typeinfo
                 == other.archetype);
             using namespace impl::utils;
-            const auto element_index = entity.data->container_index;
+            const auto* entity_data =  entity.data;
+            const auto element_index = entity_data->container_index;        // entity.data cause ICE in GCC
 
             // 1. Move whatever we can
             const auto container_move_entity = [&](auto&& iter_pair){

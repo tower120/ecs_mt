@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cstring>
 #include <string_view>
+#include <array>
 
 namespace tower120::ecs{
 
