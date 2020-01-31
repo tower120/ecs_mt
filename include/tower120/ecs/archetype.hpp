@@ -153,7 +153,10 @@ namespace tower120::ecs{
     private:
         inline static const auto& indices = []() noexcept -> const auto& {
             // prevent static order initialization fiasco
-            static const std::tuple indices{
+            static const
+            std::array<std::size_t, sizeof...(Components)>
+            //std::tuple
+                    indices{
                 typeinfo.component_index(component_typeid<Components>)...
             };
             return indices;

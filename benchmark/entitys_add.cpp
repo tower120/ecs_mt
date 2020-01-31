@@ -5,9 +5,11 @@
 
 using namespace tower120::ecs;
 
-struct data_x{ std::size_t x;};
-struct data_y{ std::size_t y;};
-struct data_z{ std::size_t z;};
+constexpr static const std::size_t payload_size = 8;    // starting from 32 - difference is unnoticeable
+
+struct data_x{ std::size_t x; std::byte payload[payload_size]{};};
+struct data_y{ std::size_t y; std::byte payload[payload_size]{};};
+struct data_z{ std::size_t z; std::byte payload[payload_size]{};};
 
 int main(){
     const std::size_t times = 100;
@@ -23,6 +25,18 @@ int main(){
             }
         });
         std::cout << "vector emplace_back : " << t.count() << std::endl;
+    }
+
+    {
+        const auto t = benchmark(times, [&](){
+            entity_manager entity_manager;
+            impl::components_container container{ archetype<data_x, data_y>::typeinfo };
+            for(std::size_t i = 0; i < count;++i){
+                entity entity = entity_manager.make();
+                container.emplace(entity, data_x{i}, data_y{i});
+            }
+        });
+        std::cout << "conmponents_container emplace : " << t.count() << std::endl;
     }
 
     {
