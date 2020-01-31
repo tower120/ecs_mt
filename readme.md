@@ -17,4 +17,5 @@ Work in progress....
 
 ### known issues
 
+ * Due to poor MSVC's `std::deque` performance, creating new entities is somewhat slow with MSVC.
  * library may not work yet across shared(dll) boundaries.

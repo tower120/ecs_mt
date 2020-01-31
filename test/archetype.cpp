@@ -57,6 +57,12 @@ int main() {
         REQUIRE(xyz == archetype<data_x, data_y, data_z>::typeinfo);
         REQUIRE(xyz + archetype<>::typeinfo == xyz);
     }
+    // + w duplicates
+    {
+        archetype_typeinfo xy  = archetype<data_x, data_y>{};
+        archetype_typeinfo xyz = xy + archetype<data_y, data_z>{};
+        REQUIRE(xyz == archetype<data_x, data_y, data_z>{});
+    }
     // -
     {
         archetype_typeinfo xyz = archetype<data_x, data_y, data_z>::typeinfo;

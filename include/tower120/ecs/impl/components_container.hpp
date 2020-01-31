@@ -104,7 +104,6 @@ namespace tower120::ecs::impl{
             using Archetype = tower120::ecs::archetype<Components...>;
             assert(Archetype::typeinfo == this->archetype);
             assert(entity_data.components_container == nullptr);
-
             m_entities.emplace_back(entity);
             (this->components<Components, Archetype>().emplace_back( std::move(components_) ), ...);
 
@@ -198,6 +197,8 @@ namespace tower120::ecs::impl{
                 })
             );
 
+            const std::size_t other_new_size = other.size();
+
             // 3. Add non-existent components
             const auto add_components_indexes = other.archetype.components_indexes<AddComponents...>();
             static_for<sizeof...(AddComponents)>([&](auto integral_constant){
@@ -210,7 +211,12 @@ namespace tower120::ecs::impl{
                     other.m_components_arrays[component_array_index]
                     .template cast<std::vector<Component>>();
 
-                component_array.push_back( std::move(component) );
+                // play safe. If we already contains that component - just update it.
+                if (component_array.size() == other_new_size) /*[[unlikely]]*/ {
+                    component_array[other_new_size - 1] = std::move(component);
+                } else {
+                    component_array.push_back( std::move(component) );
+                }
             });
 
             // Sanity checks
@@ -219,7 +225,7 @@ namespace tower120::ecs::impl{
 
             // update entity
             entity_data->components_container = &other;
-            entity_data->container_index = numeric_cast<std::uint32_t>(other.m_entities.size() - 1);
+            entity_data->container_index = numeric_cast<std::uint32_t>(other_new_size - 1);
         }
 
     // -----------------------------------

@@ -13,7 +13,6 @@
 
     O(N) add/remove components_container but fast query component group
  * expose entity_data
- * world::change_components should not add element twice. Overwrite - if necessary.
  * world::change_archetype(entity).remove_components<data_x>().add_components(data_y{1}) make interface. Act in destructor?
    world.change_components(entity)
         .remove<data_x>()

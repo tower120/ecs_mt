@@ -62,6 +62,24 @@ namespace tower120::ecs::impl::utils{
         details::apply_tuple(std::forward<Closure>(closure), type_constant<Tuple>{});
     }
 
+    template<class Tuple>
+    constexpr bool is_unique_tuple_types(){
+        bool unique = true;
+        static_for<std::tuple_size_v<Tuple>>([&](auto integral_constant1){
+            static_for<std::tuple_size_v<Tuple>>([&](auto integral_constant2){
+                constexpr const std::size_t index1 = integral_constant1.value;
+                constexpr const std::size_t index2 = integral_constant2.value;
+                if constexpr (index1 == index2) return;
+                using T1 = std::tuple_element_t<index1, Tuple>;
+                using T2 = std::tuple_element_t<index2, Tuple>;
+                if constexpr (std::is_same_v<T1, T2>){
+                    unique = false;
+                }
+            });
+        });
+        return unique;
+    }
+
     template<class Container, class Iterator>
     void unordered_erase(Container& container, Iterator iter){
         *iter = std::move(container.back());
@@ -73,7 +91,6 @@ namespace tower120::ecs::impl::utils{
         container_to.push_back(std::move(*iter_from));
         unordered_erase(container_from, std::move(iter_from));
     }
-
 
     /// map Range1 => Range2
     /// Return std::pair<First1, First2>

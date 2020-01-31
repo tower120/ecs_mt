@@ -9,6 +9,7 @@
 
    self
    ecs
+   archetype
    world
    query
 

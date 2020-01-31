@@ -49,6 +49,7 @@ namespace tower120::ecs{
         }
 
 
+        // Duplicated add_component will be overwritten with new one
         template<class ...RemoveComponents, class ...AddComponents>
         void change_components(entity ent, AddComponents... add_components){
             components_container& old_container = *ent.data->components_container;

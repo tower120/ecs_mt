@@ -26,8 +26,17 @@ void test_set_to_set_map(){
     });
 }
 
+void test_is_unique_tuple_types(){
+    using namespace tower120::ecs::impl::utils;
+
+    struct X{}; struct Y{}; struct Z{}; struct W{};
+
+    static_assert(is_unique_tuple_types<std::tuple<X, Y, Z>>());
+    static_assert(!is_unique_tuple_types<std::tuple<X, Y, Y, Z>>());
+}
 
 int main(){
     test_set_to_set_map();
+    test_is_unique_tuple_types();
     return 0;
 }
