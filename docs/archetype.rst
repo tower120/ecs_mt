@@ -1,7 +1,10 @@
 Archetype
 ==========
 
-Archetype is unique combination of components. It represented by :cpp:class:`archetype` and :cpp:class:`archetype_typeinfo`.
+Archetype is unique combination of components. Entities with identical archetype stored in the same storage.
+Entity archetype can be changed runtime (see :doc:`world`).
+
+Archetype represented by :cpp:class:`archetype` and :cpp:class:`archetype_typeinfo`.
 
 :cpp:class:`archetype` contains compile-time information about acrhetype components.
 Also, internally contains precomputed :cpp:class:`archetype_typeinfo`, and has cast operator to it:
@@ -61,7 +64,9 @@ Also, internally contains precomputed :cpp:class:`archetype_typeinfo`, and has c
     Compile-time archetype.
     ``Components...`` must be unique, you'll have compile time error otherwise.
 
-    .. cpp:type:: components = std::tuple<Components...>
+    .. type:: components = std::tuple<Components...>
+
+    .. member:: static const archetype_typeinfo type
 
     .. function:: operator const archetype_typeinfo&() const noexcept
 

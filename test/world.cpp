@@ -81,7 +81,7 @@ void test_change_components(){
     entity e1 = world.make_entity(data_x{11}, data_y{21});
     world.change_components<data_x>(e1, data_z{31});
 
-    REQUIRE( e1.archetype() == archetype<data_y, data_z>::typeinfo );
+    REQUIRE( e1.archetype() == archetype<data_y, data_z>::type );
     REQUIRE( e1.component<data_y>().y == 21 );
     REQUIRE( e1.component<data_z>().z == 31 );
 }

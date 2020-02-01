@@ -19,15 +19,15 @@ matrix:
     - env: BUILD_CONFIGURATION=Debug SAN=ASAN
       os: linux
       compiler: clang
-    - env: BUILD_CONFIGURATION=Debug SAN=MSAN
-      os: linux
-      compiler: clang
+#    - env: BUILD_CONFIGURATION=Debug SAN=MSAN
+#     os: linux
+#      compiler: clang
     - env: BUILD_CONFIGURATION=Release SAN=ASAN
       os: linux
       compiler: clang
-    - env: BUILD_CONFIGURATION=Release SAN=MSAN
-      os: linux
-      compiler: clang
+#    - env: BUILD_CONFIGURATION=Release SAN=MSAN
+#      os: linux
+#      compiler: clang
 
     # msvc
     #- os: windows

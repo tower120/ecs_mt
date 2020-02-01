@@ -30,7 +30,7 @@ namespace tower120::ecs{
 
             // search appropriate archetype
             using Archetype = archetype<Components...>;
-            components_container& container = get_archetype(Archetype::typeinfo);
+            components_container& container = get_archetype(Archetype::type);
 
             // emplace
             container.emplace(entity, std::move(components)...);
@@ -56,8 +56,8 @@ namespace tower120::ecs{
 
             const archetype_typeinfo result_archetype =
                 old_container.archetype
-                    - archetype<RemoveComponents...>::typeinfo
-                    + archetype<AddComponents...>::typeinfo;
+                    - archetype<RemoveComponents...>::type
+                    + archetype<AddComponents...>::type;
 
             components_container& new_container = get_archetype(result_archetype);
             old_container.move_entity<RemoveComponents...>(new_container, ent, std::move(add_components)...);

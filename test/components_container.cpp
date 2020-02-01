@@ -33,7 +33,7 @@ void test_inter_container_entity_move(){
     entity entity3 = entity_data_manager.make();
 
     // init
-    components_container container_xy{ArchetypeXY::typeinfo};
+    components_container container_xy{ArchetypeXY::type};
     container_xy.emplace(
         entity1,
         data_x{11}, data_y{21}
@@ -44,7 +44,7 @@ void test_inter_container_entity_move(){
     );
 
     // emplace
-    components_container container_xyz{ArchetypeXYZ::typeinfo};
+    components_container container_xyz{ArchetypeXYZ::type};
     container_xyz.emplace(
         entity3,
         data_x{13}, data_y{23}, data_z{33}
@@ -58,7 +58,7 @@ void test_inter_container_entity_move(){
     REQUIRE_SET_EQUAL(container_xyz.components<data_z>(), {data_z{31}, data_z{33}});
 
     // erase
-    components_container container_yz{archetype<data_y, data_z>::typeinfo};
+    components_container container_yz{archetype<data_y, data_z>::type};
     container_xyz.move_entity<data_x>(container_yz, entity3);
     REQUIRE_SET_EQUAL(container_xy.entities(),  {entity2});
     REQUIRE_SET_EQUAL(container_xyz.entities(), {entity1});
@@ -75,7 +75,7 @@ void test_inter_container_entity_move(){
 int main() {
     entity_manager entity_data_manager;
     using Archetype = archetype<data_x, data_y>;
-    components_container container{Archetype::typeinfo};
+    components_container container{Archetype::type};
 
     entity entity = entity_data_manager.make();
 

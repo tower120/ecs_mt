@@ -12,7 +12,7 @@ struct data_y{ std::size_t y; std::byte payload[payload_size]{};};
 struct data_z{ std::size_t z; std::byte payload[payload_size]{};};
 
 int main(){
-    const std::size_t times = 100;
+    const std::size_t times = 10;
     const std::size_t count = 100'000;
 
     {
@@ -30,7 +30,7 @@ int main(){
     {
         const auto t = benchmark(times, [&](){
             entity_manager entity_manager;
-            impl::components_container container{ archetype<data_x, data_y>::typeinfo };
+            impl::components_container container{ archetype<data_x, data_y>::type };
             for(std::size_t i = 0; i < count;++i){
                 entity entity = entity_manager.make();
                 container.emplace(entity, data_x{i}, data_y{i});

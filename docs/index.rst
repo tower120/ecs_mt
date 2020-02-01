@@ -9,6 +9,7 @@
 
    self
    ecs
+   component
    archetype
    world
    query

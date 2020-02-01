@@ -58,7 +58,7 @@ namespace tower120::ecs{
             std::size_t out_index = 0;
             set_to_set_map(
                 components(),
-                archetype<Components...>::typeinfo.components(),
+                archetype<Components...>::type.components(),
                 output_iterator([&](auto iter_pair) {
                     const std::size_t index = numeric_cast<std::size_t>(std::distance(list.begin(), iter_pair.first));
                     out[out_index] = index;
@@ -131,8 +131,11 @@ namespace tower120::ecs{
 
             // remove duplicates
             {
-                auto iter = std::unique(list.begin(), list.end());
-                list.resize( numeric_cast<std::size_t>(std::distance(list.begin(), iter)) );
+                auto last = std::unique(list.begin(), list.end());
+                while (last != list.end())
+                {
+                    list.pop_back();
+                }
             }
         }
         std::size_t make_hash() const noexcept {
@@ -164,15 +167,15 @@ namespace tower120::ecs{
             constexpr const std::size_t i = tuple_index<Component, components>();
             return std::get<i>(indices());
         }
-        inline static const class archetype_typeinfo typeinfo{component_typeid<Components>...};
+        inline static const archetype_typeinfo type{component_typeid<Components>...};
 
         // implicit cast
-        operator const archetype_typeinfo&() const noexcept { return typeinfo; }
+        operator const archetype_typeinfo&() const noexcept { return type; }
     private:
         static auto make_indices() noexcept {
             std::array<std::size_t, sizeof...(Components)>
             indices{
-                typeinfo.component_index(component_typeid<Components>)...
+                type.component_index(component_typeid<Components>)...
             };
             return indices;
         }

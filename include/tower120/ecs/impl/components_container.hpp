@@ -39,7 +39,7 @@ namespace tower120::ecs::impl{
 
             m_components_arrays.reserve(component_types.size());
             for(component_typeinfo component_type : component_types){
-                m_components_arrays.emplace_back( component_type->make_any_vector() );
+                m_components_arrays.emplace_back( component_type.type_data().make_any_vector() );
             }
         }
 
@@ -66,7 +66,7 @@ namespace tower120::ecs::impl{
         Component& component(entity entity){
             const entity_data& entity_data = *entity.data;
             assert(is_valid_entity(entity));
-            assert(Archetype::typeinfo == this->archetype);
+            assert(Archetype::type == this->archetype);
             return components<Component, Archetype>()[entity_data.container_index];
         }
 
@@ -85,7 +85,7 @@ namespace tower120::ecs::impl{
         template<class Component, class Archetype>
         [[nodiscard]]
         std::vector<Component>& components(){
-            assert(Archetype::typeinfo == this->archetype);
+            assert(Archetype::type == this->archetype);
             const std::size_t index = Archetype::template component_index<Component>();
             return m_components_arrays[index].cast< std::vector<Component> >();
         }
@@ -102,7 +102,7 @@ namespace tower120::ecs::impl{
         void emplace(entity entity, Components...components_){
             entity_data& entity_data = *entity.data;
             using Archetype = tower120::ecs::archetype<Components...>;
-            assert(Archetype::typeinfo == this->archetype);
+            assert(Archetype::type == this->archetype);
             assert(entity_data.components_container == nullptr);
             m_entities.emplace_back(entity);
             (this->components<Components, Archetype>().emplace_back( std::move(components_) ), ...);
@@ -157,8 +157,8 @@ namespace tower120::ecs::impl{
         void move_entity(components_container& other, entity entity, AddComponents... add_components){
             assert(is_valid_entity(entity));
             assert(archetype
-                + tower120::ecs::archetype<AddComponents...>::typeinfo
-                - tower120::ecs::archetype<RemoveComponents...>::typeinfo
+                + tower120::ecs::archetype<AddComponents...>::type
+                - tower120::ecs::archetype<RemoveComponents...>::type
                 == other.archetype);
             using namespace impl::utils;
             entity_data* entity_data = entity.data;
@@ -189,7 +189,7 @@ namespace tower120::ecs::impl{
             // 2. Remove
             set_to_set_map(
                 archetype.components(),
-                tower120::ecs::archetype<RemoveComponents...>::typeinfo.components(),
+                tower120::ecs::archetype<RemoveComponents...>::type.components(),
                 output_iterator([&](auto&& iter_pair){
                     const std::size_t index1 = numeric_cast<std::size_t>(std::distance(this->archetype.components().begin(), iter_pair.first));
                     any_vector& components1 = this->m_components_arrays[index1];

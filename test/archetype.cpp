@@ -52,10 +52,10 @@ int main() {
     // archetype arithmetic
     // +
     {
-        archetype_typeinfo xy  = archetype<data_x, data_y>::typeinfo;
-        archetype_typeinfo xyz = xy + archetype<data_z>::typeinfo;
-        REQUIRE(xyz == archetype<data_x, data_y, data_z>::typeinfo);
-        REQUIRE(xyz + archetype<>::typeinfo == xyz);
+        archetype_typeinfo xy  = archetype<data_x, data_y>::type;
+        archetype_typeinfo xyz = xy + archetype<data_z>::type;
+        REQUIRE(xyz == archetype<data_x, data_y, data_z>::type);
+        REQUIRE(xyz + archetype<>::type == xyz);
     }
     // + w duplicates
     {
@@ -65,10 +65,10 @@ int main() {
     }
     // -
     {
-        archetype_typeinfo xyz = archetype<data_x, data_y, data_z>::typeinfo;
-        archetype_typeinfo xy  = xyz - archetype<data_z>::typeinfo;
-        REQUIRE(xy == archetype<data_x, data_y>::typeinfo);
-        REQUIRE(xyz - archetype<>::typeinfo == xyz);
+        archetype_typeinfo xyz = archetype<data_x, data_y, data_z>::type;
+        archetype_typeinfo xy  = xyz - archetype<data_z>::type;
+        REQUIRE(xy == archetype<data_x, data_y>::type);
+        REQUIRE(xyz - archetype<>::type == xyz);
     }
 
     return 0;

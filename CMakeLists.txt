@@ -25,10 +25,6 @@ include_directories(include)
 
 file(GLOB_RECURSE INCLUDE "include/*.hpp")
 
-# ----- BENCHMARK -------
-
-add_subdirectory(benchmark)
-
 # ----- TEST -------
 
 function(_add_test TESTNAME FIRSTSOURCE)
@@ -38,3 +34,7 @@ endfunction(_add_test)
 
 enable_testing()
 add_subdirectory(test)
+
+# ----- BENCHMARK -------
+
+add_subdirectory(benchmark)
