@@ -1,7 +1,6 @@
 #pragma once
 
 #include "entity.hpp"
-//#include "query.hpp"
 #include "impl/components_container.hpp"
 #include <tower120/ecs/impl/utils/subrange.hpp>
 
@@ -31,16 +30,10 @@ namespace tower120::ecs{
 
             // search appropriate archetype
             using Archetype = archetype<Components...>;
-            auto found = archetypes.find(Archetype::typeinfo);
-            components_container* container;
-            if (found == archetypes.end()){
-                container = &make_archetype_container(Archetype::typeinfo);
-            } else {
-                container = &found->second;
-            }
+            components_container& container = get_archetype(Archetype::typeinfo);
 
             // emplace
-            container->emplace(entity, std::move(components)...);
+            container.emplace(entity, std::move(components)...);
 
             return entity;
         }
@@ -56,20 +49,36 @@ namespace tower120::ecs{
         }
 
 
-//        template<class ...RemoveComponents, class ...AddComponents>
-//        void change_components(entity ent, AddComponents... add_components){
-//            impl::components_container& components_container = *ent.data->components_container;
-//            components_container.archetype
-//
-//            // 1. Remove
-//
-//            // 2. Move rest to new archetype and add necessary components
-//        }
+        // Duplicated add_component will be overwritten with new one
+        template<class ...RemoveComponents, class ...AddComponents>
+        void change_components(entity ent, AddComponents... add_components){
+            components_container& old_container = *ent.data->components_container;
+
+            const archetype_typeinfo result_archetype =
+                old_container.archetype
+                    - archetype<RemoveComponents...>::typeinfo
+                    + archetype<AddComponents...>::typeinfo;
+
+            components_container& new_container = get_archetype(result_archetype);
+            old_container.move_entity<RemoveComponents...>(new_container, ent, std::move(add_components)...);
+
+            if (old_container.empty())
+                destroy_archetype_container(old_container.archetype);
+        }
 
     // -----------------------------------
     //          IMPLEMENTATION
     // -----------------------------------
     private:
+        components_container& get_archetype(const archetype_typeinfo& archetype){
+            const auto found = archetypes.find(archetype);
+            if (found == archetypes.end()){
+                return make_archetype_container(archetype);
+            } else {
+                return found->second;
+            }
+        }
+
         components_container& make_archetype_container(const archetype_typeinfo& archetype){
             // construct container per se
             auto pair = archetypes.emplace(archetype, archetype);   assert(pair.second);
@@ -85,14 +94,25 @@ namespace tower120::ecs{
         }
 
 
-        void destroy_archetype_container(archetype_typeinfo archetype){
+        void destroy_archetype_container(const archetype_typeinfo& archetype){
+            using namespace impl::utils;
+            for(component_typeinfo component_type : archetype.components()){
+                // erase only with specific archetype
+                subrange found{components.equal_range(component_type)};
+                assert(!found.empty());
+                for (auto i = found.begin(), last = found.end(); i != last; ++i) {
+                    const components_container& container = *i->second;
+                    if (container.archetype.hash() == archetype.hash()
+                        && container.archetype == archetype)
+                    {
+                        components.erase(i);
+                        break;
+                    }
+                }
+            }
+
             assert(archetypes.count(archetype) == 1);
             archetypes.erase(archetype);
-
-            for(component_typeinfo component_type : archetype.components()){
-                assert(components.count(component_type) == 1);
-                components.erase(component_type);
-            }
 
             assert(is_valid_components());
         }
@@ -180,7 +200,7 @@ namespace tower120::ecs{
     private:
         class entity_manager entity_manager;
         std::unordered_map<archetype_typeinfo, components_container> archetypes;
-        std::unordered_multimap<component_typeinfo, components_container*> components;
+        std::unordered_multimap<component_typeinfo, components_container*> components;  // TODO: optimise
     };
 
 }

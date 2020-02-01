@@ -74,7 +74,21 @@ void test_containers_query(){
 }
 
 
+void test_change_components(){
+    using namespace tower120::ecs;
+    world world;
+
+    entity e1 = world.make_entity(data_x{11}, data_y{21});
+    world.change_components<data_x>(e1, data_z{31});
+
+    REQUIRE( e1.archetype() == archetype<data_y, data_z>::typeinfo );
+    REQUIRE( e1.component<data_y>().y == 21 );
+    REQUIRE( e1.component<data_z>().z == 31 );
+}
+
+
 int main() {
     test_make_destroy_entity();
     test_containers_query();
+    test_change_components();
 }

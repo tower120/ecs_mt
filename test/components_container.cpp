@@ -1,22 +1,78 @@
 #include <tower120/ecs/impl/components_container.hpp>
 #include "test_utils.hpp"
 
+using namespace tower120::ecs;
+using namespace tower120::ecs::impl;
+
+
+struct data_x {
+   int x;
+   bool operator==(const data_x& other) const{ return x == other.x; }
+};
+struct data_y {
+    int y;
+    bool operator==(const data_y& other) const{ return y == other.y; }
+};
+struct data_z {
+    int z;
+    bool operator==(const data_z& other) const{ return z == other.z; }
+};
+struct data_w {
+    int w;
+    bool operator==(const data_w& other) const{ return w == other.w; }
+};
+
+
+void test_inter_container_entity_move(){
+    entity_manager entity_data_manager;
+    using ArchetypeXY  = archetype<data_x, data_y>;
+    using ArchetypeXYZ = archetype<data_x, data_y, data_z>;
+
+    entity entity1 = entity_data_manager.make();
+    entity entity2 = entity_data_manager.make();
+    entity entity3 = entity_data_manager.make();
+
+    // init
+    components_container container_xy{ArchetypeXY::typeinfo};
+    container_xy.emplace(
+        entity1,
+        data_x{11}, data_y{21}
+    );
+    container_xy.emplace(
+        entity2,
+        data_x{12}, data_y{22}
+    );
+
+    // emplace
+    components_container container_xyz{ArchetypeXYZ::typeinfo};
+    container_xyz.emplace(
+        entity3,
+        data_x{13}, data_y{23}, data_z{33}
+    );
+
+    container_xy.move_entity(container_xyz, entity1, data_z{31});
+    REQUIRE_SET_EQUAL(container_xy.entities(),  {entity2});
+    REQUIRE_SET_EQUAL(container_xyz.entities(), {entity3, entity1});
+    REQUIRE_SET_EQUAL(container_xyz.components<data_x>(), {data_x{11}, data_x{13}});
+    REQUIRE_SET_EQUAL(container_xyz.components<data_y>(), {data_y{21}, data_y{23}});
+    REQUIRE_SET_EQUAL(container_xyz.components<data_z>(), {data_z{31}, data_z{33}});
+
+    // erase
+    components_container container_yz{archetype<data_y, data_z>::typeinfo};
+    container_xyz.move_entity<data_x>(container_yz, entity3);
+    REQUIRE_SET_EQUAL(container_xy.entities(),  {entity2});
+    REQUIRE_SET_EQUAL(container_xyz.entities(), {entity1});
+    REQUIRE_SET_EQUAL(container_yz.entities(),  {entity3});
+
+    // emplace + erase check
+    container_yz.move_entity<data_z>(container_xy, entity3, data_x{31});
+    REQUIRE(container_yz.entities().empty());
+    REQUIRE_SET_EQUAL(container_xy.entities(),  {entity2, entity3});
+    REQUIRE_SET_EQUAL(container_xyz.entities(), {entity1});
+}
+
+
 int main() {
-    using namespace tower120::ecs;
-    using namespace tower120::ecs::impl;
-    //using namespace ranges;
-
-    struct data_x {
-       int x;
-
-       bool operator==(const data_x& other) const{ return x == other.x; }
-    };
-    struct data_y {
-        int y;
-
-        bool operator==(const data_y& other) const{ return y == other.y; }
-    };
-
     entity_manager entity_data_manager;
     using Archetype = archetype<data_x, data_y>;
     components_container container{Archetype::typeinfo};
@@ -74,6 +130,8 @@ int main() {
     );
     container.erase<Archetype>(entity);
     REQUIRE(container.size() == 0);
+
+    test_inter_container_entity_move();
 
     return 0;
 }

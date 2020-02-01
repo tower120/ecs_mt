@@ -7,6 +7,9 @@ if (MSVC)
   add_compile_options(/W4 /WX)
 else()
   add_compile_options(-Wall -Wextra -Wconversion -pedantic -Werror)
+  if (APPLE)
+    add_compile_options(-Wno-error=missing-braces)
+  endif()
 endif()
 
 
@@ -24,7 +27,7 @@ file(GLOB_RECURSE INCLUDE "include/*.hpp")
 
 # ----- BENCHMARK -------
 
-#add_subdirectory(benchmark)
+add_subdirectory(benchmark)
 
 # ----- TEST -------
 
