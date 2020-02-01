@@ -5,7 +5,7 @@ Header : ``tower120/ecs/query.hpp``
 
 You can query your world with the following api:
 
-.. code-block::
+.. code-block:: cpp
 
   world main_world;
 
@@ -36,7 +36,7 @@ You can query your world with the following api:
 
     Queried entities must contain all components. Chained ``contains`` accumulates:
 
-    .. code-block::
+    .. code-block:: cpp
 
       component_typeinfo component_b = component_typeid<ComponentB>;
 
@@ -52,7 +52,7 @@ You can query your world with the following api:
 
   .. function:: template<class Closure> void foreach_container(Closure&& closure)
 
-    .. code-block::    
+    .. code-block:: cpp
 
       query(main_world)
       .contains<ComponentA>()
@@ -67,7 +67,7 @@ You can query your world with the following api:
 
     Required components deducted from ``closure`` signature:
 
-    .. code-block::    
+    .. code-block:: cpp
 
       query(main_world)
       .foreach([](/*entity*/, ComponentA&, ComponentB&) -> bool /*proceed / optional*/{
@@ -81,7 +81,7 @@ You can query your world with the following api:
 
   .. function:: template<class ...Components> query_result<Components...> select()
 
-    .. code-block::    
+    .. code-block:: cpp
 
       for (auto&&[entity, a, b] : query(main_world).select<ComponentA, ComponentB>())
       {

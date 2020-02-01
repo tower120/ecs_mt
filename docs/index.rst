@@ -29,7 +29,7 @@ Storage
 
 ECS MT has archetype storage architecture, namely all components grouped by their entities archetype. Where archetype is unique combination of component types. Similar storage layout used in Unity ECS. 
 
-.. code-block::
+.. code-block:: cpp
 
     world{
         ArchetypeXY = X+Y

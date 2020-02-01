@@ -9,7 +9,7 @@ Archetype represented by :cpp:class:`archetype` and :cpp:class:`archetype_typein
 :cpp:class:`archetype` contains compile-time information about acrhetype components.
 Also, internally contains precomputed :cpp:class:`archetype_typeinfo`, and has cast operator to it:
 
-.. code-block::
+.. code-block:: cpp
 
     archetype_typeinfo arch_xy  = archetype<X, Y>{};
 
@@ -35,7 +35,7 @@ Also, internally contains precomputed :cpp:class:`archetype_typeinfo`, and has c
 
         Add components from other archetype_typeinfo. Result components list does not contains duplicates:
 
-        .. code-block::
+        .. code-block:: cpp
 
             archetype_typeinfo arch_xy  = archetype<X, Y>{};
             archetype_typeinfo arch_xyz = arch_xy + archetype<Y, Z>{};
@@ -72,6 +72,6 @@ Also, internally contains precomputed :cpp:class:`archetype_typeinfo`, and has c
 
         Return statically precomputed ``archetype_typeinfo``.
 
-        .. code-block::
+        .. code-block:: cpp
 
             archetype_typeinfo arch_xy  = archetype<X, Y>{};

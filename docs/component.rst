@@ -8,7 +8,7 @@ Components may be moved during entity destruction, also when entity's archetype 
 
 Library allow you to have any **movable** class/struct as component:
 
-.. code-block::
+.. code-block:: cpp
 
     struct Pos {
         float x;
@@ -34,6 +34,6 @@ Library allow you to have any **movable** class/struct as component:
 
 .. var:: template<class Component> constexpr component_typeinfo component_typeid
 
-    .. code-block::
+    .. code-block:: cpp
 
         assert(component_typeid<Pos> != component_typeid<Velocity>);
