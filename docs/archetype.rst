@@ -13,6 +13,7 @@ Also, internally contains precomputed :cpp:class:`archetype_typeinfo`, and has c
 
     archetype_typeinfo arch_xy  = archetype<X, Y>{};
 
+
 ----
 
 .. class:: archetype_typeinfo
