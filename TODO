@@ -1,6 +1,4 @@
  * Implement, utilize chunks (for faster move between components_container s)
- * Component type id from compile time hash. archetypes semi compile time.
- * unique archetype_id + archetype_manager. Can be created only from main thread. ???
  * return std::span whenever possible,
  * move out components_container from impl + make container_view
  * add copyrights
@@ -12,9 +10,13 @@
     std::unordered_multimap<component_typeinfo, std::vector<components_container*> /*sorted*/ >
 
     O(N) add/remove components_container but fast query component group
- * expose entity_data
  * world::change_archetype(entity).remove_components<data_x>().add_components(data_y{1}) make interface. Act in destructor?
    world.change_components(entity)
         .remove<data_x>()
         .add(data_y{1})
         .execute()
+
+Maybe:
+ * Component type id from compile time hash. archetypes semi compile time.
+ * unique archetype_id + archetype_manager. Can be created only from main thread. ???
+ * expose entity_data

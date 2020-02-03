@@ -18,4 +18,5 @@ Work in progress....
 ### known issues
 
  * Due to poor MSVC's `std::deque` performance, creating new entities is somewhat slow with MSVC.
+ * currently MSVC is x2-x3 times slower, mainly due to poor work with lambdas.
  * library may not work yet across shared(dll) boundaries.

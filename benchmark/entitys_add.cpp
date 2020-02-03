@@ -42,7 +42,6 @@ int main(){
     {
         const auto t = benchmark(times, [&](){
             world world;
-            entity_manager entity_manager;
             for(std::size_t i = 0; i < count;++i){
                 world.make_entity(data_x{i}, data_y{i});
             }

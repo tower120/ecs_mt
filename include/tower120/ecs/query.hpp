@@ -23,7 +23,7 @@ namespace tower120::ecs{
         {}
 
         // return container view
-        tcb::span<impl::components_container> containers(){
+        tcb::span<impl::components_container*> containers(){
             return m_containers;
         }
 
