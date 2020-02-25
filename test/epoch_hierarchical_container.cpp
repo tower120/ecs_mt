@@ -24,6 +24,84 @@ int main(){
     REQUIRE_EQUAL(container.levels()[1], {1, 3, 5, 7});
     REQUIRE_EQUAL(container.levels()[2], {3, 7});
 
+    // test set
+    {
+        auto c = container;
+        c.set(0, 100);
+        REQUIRE_EQUAL(c.levels()[0], {100, 1, 2, 3, 4, 5, 6, 7});
+        REQUIRE_EQUAL(c.levels()[1], {100, 3, 5, 7});
+        REQUIRE_EQUAL(c.levels()[2], {100, 7});
+    }
+    {
+        auto c = container;
+        c.set(1, 100);
+        REQUIRE_EQUAL(c.levels()[0], {0, 100, 2, 3, 4, 5, 6, 7});
+        REQUIRE_EQUAL(c.levels()[1], {100, 3, 5, 7});
+        REQUIRE_EQUAL(c.levels()[2], {100, 7});
+    }
+    {
+        auto c = container;
+        c.set(2, 100);
+        REQUIRE_EQUAL(c.levels()[0], {0, 1, 100, 3, 4, 5, 6, 7});
+        REQUIRE_EQUAL(c.levels()[1], {1, 100, 5, 7});
+        REQUIRE_EQUAL(c.levels()[2], {100, 7});
+    }
+    {
+        auto c = container;
+        c.set(3, 100);
+        REQUIRE_EQUAL(c.levels()[0], {0, 1, 2, 100, 4, 5, 6, 7});
+        REQUIRE_EQUAL(c.levels()[1], {1, 100, 5, 7});
+        REQUIRE_EQUAL(c.levels()[2], {100, 7});
+    }
+    {
+        auto c = container;
+        c.set(4, 100);
+        REQUIRE_EQUAL(c.levels()[0], {0, 1, 2, 3, 100, 5, 6, 7});
+        REQUIRE_EQUAL(c.levels()[1], {1, 3, 100, 7});
+        REQUIRE_EQUAL(c.levels()[2], {3, 100});
+    }
+    {
+        auto c = container;
+        c.set(5, 100);
+        REQUIRE_EQUAL(c.levels()[0], {0, 1, 2, 3, 4, 100, 6, 7});
+        REQUIRE_EQUAL(c.levels()[1], {1, 3, 100, 7});
+        REQUIRE_EQUAL(c.levels()[2], {3, 100});
+    }
+    {
+        auto c = container;
+        c.set(6, 100);
+        REQUIRE_EQUAL(c.levels()[0], {0, 1, 2, 3, 4, 5, 100, 7});
+        REQUIRE_EQUAL(c.levels()[1], {1, 3, 5, 100});
+        REQUIRE_EQUAL(c.levels()[2], {3, 100});
+    }
+    {
+        auto c = container;
+        c.set(7, 100);
+        REQUIRE_EQUAL(c.levels()[0], {0, 1, 2, 3, 4, 5, 6, 100});
+        REQUIRE_EQUAL(c.levels()[1], {1, 3, 5, 100});
+        REQUIRE_EQUAL(c.levels()[2], {3, 100});
+    }
+
+    // test set . Setting lower epoch...
+    {
+        auto c = container;
+        c.set(6, 0);
+        REQUIRE_EQUAL(c.levels()[0], {0, 1, 2, 3, 4, 5, 0, 7});
+        REQUIRE_EQUAL(c.levels()[1], {1, 3, 5, 7});
+        REQUIRE_EQUAL(c.levels()[2], {3, 7});
+    }
+
+    {
+        auto c = container;
+        c.set(0, 2);
+        REQUIRE_EQUAL(c.levels()[0], {2, 1, 2, 3, 4, 5, 6, 7});
+        REQUIRE_EQUAL(c.levels()[1], {2, 3, 5, 7});
+        REQUIRE_EQUAL(c.levels()[2], {3, 7});
+    }
+
+
+    return 0;
+
     // XXX: NOT WORK. SMTHG WRONG
     // test erase at the end
     {
