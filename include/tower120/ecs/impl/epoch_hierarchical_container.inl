@@ -32,27 +32,27 @@ namespace tower120::ecs::impl{
     }
 
     template<class Epoch>
-    void epoch_hierarchical_container<Epoch>::set(std::size_t index, const Epoch& epoch) {
+    void epoch_hierarchical_container<Epoch>::set_v1(std::size_t index, const Epoch& epoch) {
         m_levels[0][index] = epoch;
 
         // update levels
-        const std::size_t end_level_index = m_levels.size() - 1;
+        const std::size_t level_group_size = 1 << m_group_size_step_pot;
+        const std::size_t end_level_index  = m_levels.size() - 1;
         for(std::size_t level_index = 0; level_index < end_level_index; ++level_index){
             const std::size_t next_level_index = level_index+1;
             auto& next_level = m_levels[next_level_index];
             const std::size_t next_level_element_index = index >> (next_level_index * m_group_size_step_pot);
             Epoch& aggregated_epoch = next_level[next_level_element_index];
             
-            if (aggregated_epoch >= epoch)
+            /*if (aggregated_epoch >= epoch)
                 break;
-            //if (aggregated_epoch < epoch){
+            if (aggregated_epoch < epoch){
                 aggregated_epoch = epoch;
-                /*continue;
+                continue;
             }*/
 
-            /*const auto& level = m_levels[level_index];
+            const auto& level = m_levels[level_index];
             const std::size_t level_group_size_pot = level_index * m_group_size_step_pot;
-            const std::size_t level_group_size = 1 << level_group_size_pot;
             const std::size_t index_start = index >> level_group_size_pot;
             const std::size_t index_end   = std::min(index_start + level_group_size, level.size());
 
@@ -60,12 +60,36 @@ namespace tower120::ecs::impl{
                 level.begin() + static_cast<std::ptrdiff_t>(index_start),
                 level.begin() + static_cast<std::ptrdiff_t>(index_end));
 
-            if (aggregated_epoch >= new_aggregated_epoch){
+            /*if (aggregated_epoch >= new_aggregated_epoch){
                 break;
-            }
-            aggregated_epoch = new_aggregated_epoch;*/
+            }*/
+            aggregated_epoch = new_aggregated_epoch;
         }
     }
+
+
+    template<class Epoch>
+    void epoch_hierarchical_container<Epoch>::set(std::size_t element_index, const Epoch& epoch) {
+        m_levels[0][element_index] = epoch;
+
+        // update
+        const std::size_t end_level_index = m_levels.size() - 1;
+        for(std::size_t level_index = 0; level_index < end_level_index; ++level_index){
+            const auto& level = m_levels[level_index];
+            const std::size_t next_level_index = level_index + 1;
+            const std::size_t group_index = element_index >> (m_group_size_step_pot * next_level_index);
+
+            const std::size_t start = group_index << m_group_size_step_pot;
+            const std::size_t end = std::min((group_index + 1) << m_group_size_step_pot, level.size());
+
+            const Epoch aggregated_epoch = *std::max_element(
+                level.begin() + static_cast<std::ptrdiff_t>(start),
+                level.begin() + static_cast<std::ptrdiff_t>(end));
+
+            m_levels[next_level_index][group_index] = aggregated_epoch;
+        }
+    }
+
 
     template<class Epoch>
     void epoch_hierarchical_container<Epoch>::unordered_erase(std::size_t index_) {

@@ -32,6 +32,7 @@ int main(){
         REQUIRE_EQUAL(c.levels()[1], {100, 3, 5, 7});
         REQUIRE_EQUAL(c.levels()[2], {100, 7});
     }
+
     {
         auto c = container;
         c.set(1, 100);
@@ -90,7 +91,13 @@ int main(){
         REQUIRE_EQUAL(c.levels()[1], {1, 3, 5, 7});
         REQUIRE_EQUAL(c.levels()[2], {3, 7});
     }
-
+    {
+        auto c = container;
+        c.set(7, 0);
+        REQUIRE_EQUAL(c.levels()[0], {0, 1, 2, 3, 4, 5, 6, 0});
+        REQUIRE_EQUAL(c.levels()[1], {1, 3, 5, 6});
+        REQUIRE_EQUAL(c.levels()[2], {3, 6});
+    }
     {
         auto c = container;
         c.set(0, 2);
