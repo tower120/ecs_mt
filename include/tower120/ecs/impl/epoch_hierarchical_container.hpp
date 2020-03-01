@@ -26,7 +26,7 @@ namespace tower120::ecs::impl{
 
         void set_v1(std::size_t index, const Epoch& epoch);
 
-        void set(std::size_t index, const Epoch& epoch);
+        void set(std::size_t index, Epoch epoch);
 
         void unordered_erase(std::size_t index_);
 

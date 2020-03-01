@@ -69,24 +69,31 @@ namespace tower120::ecs::impl{
 
 
     template<class Epoch>
-    void epoch_hierarchical_container<Epoch>::set(std::size_t element_index, const Epoch& epoch) {
+    void epoch_hierarchical_container<Epoch>::set(std::size_t element_index, Epoch epoch) {
         m_levels[0][element_index] = epoch;
 
         // update
         const std::size_t end_level_index = m_levels.size() - 1;
-        for(std::size_t level_index = 0; level_index < end_level_index; ++level_index){
+        for(
+            std::size_t level_index = 0, group_index = element_index >> m_group_size_step_pot;
+            level_index < end_level_index;
+            ++level_index, group_index >>= m_group_size_step_pot)
+        {
+            auto& aggregated = m_levels[level_index + 1][group_index];
+            if (aggregated <= epoch){    // this will happen most of the time, since we will increase epoch
+                aggregated = epoch;
+                continue;
+            }
+
             const auto& level = m_levels[level_index];
-            const std::size_t next_level_index = level_index + 1;
-            const std::size_t group_index = element_index >> (m_group_size_step_pot * next_level_index);
-
             const std::size_t start = group_index << m_group_size_step_pot;
-            const std::size_t end = std::min((group_index + 1) << m_group_size_step_pot, level.size());
+            const std::size_t end   = std::min((group_index + 1) << m_group_size_step_pot, level.size());
 
-            const Epoch aggregated_epoch = *std::max_element(
+            aggregated = *std::max_element(
                 level.begin() + static_cast<std::ptrdiff_t>(start),
                 level.begin() + static_cast<std::ptrdiff_t>(end));
 
-            m_levels[next_level_index][group_index] = aggregated_epoch;
+            epoch = aggregated;
         }
     }
 
